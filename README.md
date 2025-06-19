@@ -1,6 +1,6 @@
 # 🔗 Hub Blockchain Project
 
-**Dự án Tiểu Luận Cá Nhân**: Blockchain trong Quản lý Chuỗi Cung Ứng
+**Dự án**: Blockchain
 
 ---
 
@@ -8,17 +8,14 @@
 
 **Tác giả**: **TS. Nguyễn Hoài Đức**  
 **Trường**: Đại học Ngân Hàng TP. Hồ Chí Minh (HUB)  
-**Môn học**: Chuỗi khối trong Kinh doanh (BLB 515)  
-**Đề tài**: Blockchain trong quản lý chuỗi cung ứng
+**Môn học**: Chuỗi khối trong Kinh doanh (BLB 515)
 
 ---
 
 ## 🎯 Mục tiêu
 
 1. **Nghiên cứu lý thuyết**: Phân tích các khái niệm cốt lõi của công nghệ blockchain
-2. **Ứng dụng thực tế**: Triển khai mô hình blockchain cho quản lý chuỗi cung ứng
-3. **Đánh giá hiệu quả**: So sánh với các hệ thống truyền thống
-4. **Visualization**: Mô phỏng hoạt động của blockchain network
+2. **Visualization**: Mô phỏng hoạt động của blockchain network
 
 ---
 
@@ -271,7 +268,7 @@ Khởi động node ở chế độ máy chủ, lắng nghe kết nối từ cá
 Bài tiểu luận cá nhân này đóng góp:
 
 1. **Mô hình thực tế**: Implementation hoàn chỉnh của blockchain network
-2. **Phân tích so sánh**: PoW vs PoS trong môi trường supply chain
+2. **Phân tích so sánh**: So sánh hiệu quả giữa PoW và PoS
 3. **Case study**: Ứng dụng cụ thể cho doanh nghiệp Việt Nam
 4. **Performance evaluation**: Đánh giá hiệu suất và khả năng mở rộng
 
