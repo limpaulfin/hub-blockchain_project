@@ -1,0 +1,62 @@
+{
+  "title": "Lesson Learned: Project Initialization and Archiving Workflow",
+  "description": "A standardized procedure for archiving a completed project and setting up a new one within the Obsidian vault. This ensures a clean and organized structure.",
+  "created_at": ["2025-06-19--12:39-PM", 1750311548],
+  "updated_at": ["2025-06-19--12:39-PM", 1750311548],
+  "last_accessed": "2025-06-19--12:39-PM",
+  "access_count": 1,
+  "importance": 0.8,
+  "version": "1.0",
+  "sot_identifier": "project-lifecycle-workflow",
+  "lesson": {
+    "context": "The user completed one project (a university course) and wanted to start a new, separate project. This required archiving the old notes and correctly setting up the directory structure and rules for the new project.",
+    "what_happened": "We successfully moved the completed project folder to 'Z-archive-storage'. Then, through clarification, we created a new dedicated folder for the new project under '/projects', created a new .mdc rule to enforce the storage location, and initialized the project with an overview note.",
+    "key_takeaway": "When starting a new project, it is crucial to first define its scope and place in the existing folder structure. Creating a dedicated rule file (.mdc) helps automate and enforce consistency for future note-taking. Archiving old projects keeps the workspace clean."
+  },
+  "actionable_checklist": [
+    "Confirm with the user that a project is complete.",
+    "Identify the correct archive location (e.g., 'Z-archive-storage') using 'tree' or 'find'.",
+    "Move the completed project folder into the archive directory using 'mv'.",
+    "Discuss with the user to clarify the nature and correct placement of the new project.",
+    "Create a new, clearly-named directory for the new project.",
+    "Create a new .mdc rule file in '.cursor/rules/' that specifies the storage path and activation keywords for the new project.",
+    "Create an initial overview/index note inside the new project folder to define its purpose and structure."
+  ],
+  "related_files": [
+    {
+      "file_name": "rule-hub-blockchain-project.mdc",
+      "file_location": ".cursor/rules/",
+      "relationship": "The rule created as part of this workflow."
+    },
+    {
+      "file_name": "00-project-overview.md",
+      "file_location": "/home/fong/onedrive/Apps/remotely-save/FongObsidian/projects/HUB-blockchain-project-thay-Duc/",
+      "relationship": "The initial project note created."
+    },
+    {
+      "file_name": "manifest.json",
+      "file_location": "/home/fong/onedrive/Apps/remotely-save/FongObsidian/",
+      "relationship": "The vault manifest, which was created during this process to map the folder structure."
+    }
+  ],
+  "tags": [
+    "project setup",
+    "project management",
+    "archiving",
+    "obsidian",
+    "workflow",
+    "automation",
+    "rules",
+    "mdc",
+    "folder structure",
+    "thiết lập dự án",
+    "quản lý dự án",
+    "lưu trữ",
+    "quy trình",
+    "tự động hóa",
+    "cấu trúc thư mục",
+    "bài học kinh nghiệm",
+    "sot-workflow",
+    "project-lifecycle"
+  ]
+}

@@ -44,7 +44,7 @@ class StorageConfig:
     """Cấu hình lưu trữ"""
     data_directory: str = "./data"
     blockchain_file: str = "blockchain.json"
-    wallet_file: str = "wallets.json"
+    wallets_file: str = "wallets.json"
     auto_save: bool = True
     backup_interval: int = 3600  # seconds
 
@@ -202,7 +202,7 @@ class Config:
     
     def get_wallet_file_path(self) -> str:
         """Lấy đường dẫn file wallet"""
-        return os.path.join(self.storage.data_directory, self.storage.wallet_file)
+        return os.path.join(self.storage.data_directory, self.storage.wallets_file)
     
     def is_development(self) -> bool:
         """Kiểm tra có phải development environment"""
