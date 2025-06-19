@@ -111,7 +111,7 @@ Sơ đồ sau minh họa quy trình làm việc phổ biến khi sử dụng CLI
     |
     v
 +---------------------+      +---------------------+      +---------------------+
-| 1. Tạo Ví           |----->| 2. Thực hiện        |----->| 3. Đào khối          |
+| 1. Tạo Ví           |----->| 2. Thực hiện        |----->| 3. Đào khối         |
 | `create-wallet`     |      |    Giao dịch        |      | `mine`              |
 |                     |      | `transaction`       |      |                     |
 +---------------------+      +---------------------+      +---------------------+
@@ -123,8 +123,8 @@ Sơ đồ sau minh họa quy trình làm việc phổ biến khi sử dụng CLI
     |         |        +------------------------------+              |
     v         |                                                      v
 +---------------------+      +---------------------+      +---------------------+
-| 4. Kiểm tra Ví      |----->| 5. Kiểm tra Chuỗi   |----->| 6. Kiểm tra Trạng thái|
-| `wallets`           |      | `chain`             |      | `status`            |
+| 4. Kiểm tra Ví      |----->| 5. Kiểm tra Chuỗi   |----->| 6. Kiểm tra Trạng   |
+| `wallets`           |      | `chain`             |      |  thái `status`      |
 |                     |      |                     |      |                     |
 +---------------------+      +---------------------+      +---------------------+
     ^                                                            |
@@ -250,24 +250,6 @@ Khởi động node ở chế độ máy chủ, lắng nghe kết nối từ cá
   HTTP server running on http://localhost:8080
   Press Ctrl+C to shut down. / Nhấn Ctrl+C để tắt.
   ```
-
----
-
-## 🔬 Nghiên cứu & Phân tích
-
-### Supply Chain Use Cases
-
-1. **Traceability**: Theo dõi nguồn gốc sản phẩm
-2. **Transparency**: Minh bạch thông tin cho tất cả stakeholders
-3. **Security**: Bảo mật dữ liệu với cryptographic hashing
-4. **Immutability**: Tính bất biến của records
-
-### Performance Metrics
-
-- **Transaction Throughput**: TPS (Transactions Per Second)
-- **Mining Efficiency**: Hash rate và energy consumption
-- **Network Latency**: Thời gian propagation giữa nodes
-- **Storage Optimization**: Blockchain size management
 
 ---
 
