@@ -10,6 +10,7 @@ import socket
 import threading
 import json
 import time
+import hashlib
 from typing import Dict, List, Set, Optional, Callable
 from dataclasses import dataclass
 
@@ -41,6 +42,7 @@ class P2PNetwork:
     Lớp quản lý mạng P2P cho blockchain
     
     Attributes:
+        blockchain: Blockchain instance
         host (str): Địa chỉ host của node này
         port (int): Port lắng nghe
         node_id (str): ID của node này
@@ -48,18 +50,20 @@ class P2PNetwork:
         message_handlers (Dict[str, Callable]): Handlers cho các loại message
     """
     
-    def __init__(self, host: str = "localhost", port: int = 8000, node_id: str = ""):
+    def __init__(self, blockchain, host: str = "localhost", port: int = 8000, node_id: str = ""):
         """
         Khởi tạo P2P network
         
         Args:
+            blockchain: Blockchain instance
             host: Địa chỉ IP để bind
             port: Port để lắng nghe
             node_id: ID của node này
         """
+        self.blockchain = blockchain
         self.host = host
         self.port = port
-        self.node_id = node_id
+        self.node_id = node_id or hashlib.sha256(f"{host}:{port}".encode()).hexdigest()
         self.peers: Dict[str, PeerInfo] = {}
         self.message_handlers: Dict[str, Callable] = {}
         
@@ -79,6 +83,8 @@ class P2PNetwork:
         self.register_handler("pong", self._handle_pong)
         self.register_handler("peer_discovery", self._handle_peer_discovery)
         self.register_handler("peer_list", self._handle_peer_list)
+        self.register_handler("new_block", self._handle_new_block)
+        self.register_handler("new_transaction", self._handle_new_transaction)
     
     def register_handler(self, message_type: str, handler: Callable):
         """
@@ -91,7 +97,7 @@ class P2PNetwork:
         self.message_handlers[message_type] = handler
         print(f"Registered handler for message type: {message_type}")
     
-    def start_server(self):
+    def start(self):
         """Bắt đầu server P2P"""
         try:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +115,7 @@ class P2PNetwork:
         except Exception as e:
             print(f"Failed to start P2P server: {e}")
     
-    def stop_server(self):
+    def stop(self):
         """Dừng server P2P"""
         self.is_running = False
         if self.server_socket:
@@ -248,6 +254,24 @@ class P2PNetwork:
         data = json.dumps(message).encode('utf-8')
         sock.send(data)
     
+    def broadcast_block(self, block: 'Block'):
+        """Phát tán block mới đến tất cả peers"""
+        print(f"Broadcasting block #{block.index} to all peers...")
+        message = {
+            'type': 'new_block',
+            'block': block.to_dict()
+        }
+        self.broadcast_message(message)
+
+    def broadcast_transaction(self, transaction: 'Transaction'):
+        """Phát tán giao dịch mới đến tất cả peers"""
+        print(f"Broadcasting transaction {transaction.transaction_hash[:10]}... to all peers...")
+        message = {
+            'type': 'new_transaction',
+            'transaction': transaction.to_dict()
+        }
+        self.broadcast_message(message)
+    
     def discover_peers(self):
         """Khám phá peers mới từ các peers hiện có"""
         discovery_message = {
@@ -297,6 +321,36 @@ class P2PNetwork:
                 print(f"Discovered new peer: {endpoint}")
                 # Có thể tự động kết nối hoặc chỉ thêm vào danh sách
     
+    def _handle_new_block(self, message: Dict, sender_socket: socket.socket):
+        """Xử lý khi nhận được block mới từ mạng"""
+        block_data = message.get('block')
+        if not block_data:
+            print("Received a 'new_block' message without block data.")
+            return
+
+        try:
+            new_block = self.blockchain.block_from_dict(block_data)
+            if self.blockchain.add_block(new_block):
+                print(f"✅ Appended new block #{new_block.index} from network.")
+            else:
+                print(f"❌ Received invalid or old block #{new_block.index}.")
+        except Exception as e:
+            print(f"Error processing new block from network: {e}")
+
+    def _handle_new_transaction(self, message: Dict, sender_socket: socket.socket):
+        """Xử lý khi nhận được giao dịch mới từ mạng"""
+        tx_data = message.get('transaction')
+        if not tx_data:
+            print("Received a 'new_transaction' message without transaction data.")
+            return
+            
+        try:
+            transaction = Transaction.from_dict(tx_data)
+            if self.blockchain.add_transaction(transaction):
+                print(f"Added new transaction {transaction.transaction_hash[:10]}... from network to mempool.")
+        except Exception as e:
+            print(f"Error processing new transaction from network: {e}")
+
     def get_peer_count(self) -> int:
         """Lấy số lượng peers đang kết nối"""
         return sum(1 for peer in self.peers.values() if peer.is_connected)

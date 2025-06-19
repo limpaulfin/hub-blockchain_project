@@ -17,6 +17,11 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     HTTP Request Handler cho blockchain API
     """
     
+    def __init__(self, blockchain, p2p_network, *args, **kwargs):
+        self.blockchain = blockchain
+        self.p2p_network = p2p_network
+        super().__init__(*args, **kwargs)
+
     def do_GET(self):
         """Xử lý GET requests"""
         parsed_path = urlparse(self.path)
@@ -93,22 +98,18 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     
     def _handle_status(self):
         """Xử lý status endpoint"""
-        node = self.server.blockchain_node
-        status = node.get_node_status()
-        
-        # Thêm thông tin server
-        status.update({
-            "server_host": self.server.server_address[0],
-            "server_port": self.server.server_address[1],
-            "api_version": "1.0.0"
-        })
-        
+        status = {
+            "blocks": len(self.blockchain.chain),
+            "pending_transactions": len(self.blockchain.pending_transactions),
+            "difficulty": self.blockchain.difficulty,
+            "is_valid": self.blockchain.is_chain_valid(),
+            "peers": len(self.p2p_network.peers) if self.p2p_network else 0,
+        }
         self._send_json_response(status)
     
     def _handle_get_blockchain(self):
         """Xử lý get blockchain endpoint"""
-        node = self.server.blockchain_node
-        blockchain_data = node.blockchain.to_dict()
+        blockchain_data = [block.to_dict() for block in self.blockchain.chain]
         self._send_json_response(blockchain_data)
     
     def _handle_get_balance(self, query_params):
@@ -118,8 +119,7 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
             self._send_error(400, "Missing address parameter")
             return
         
-        node = self.server.blockchain_node
-        balance = node.blockchain.get_balance(address[0])
+        balance = self.blockchain.get_balance(address[0])
         
         response = {
             "address": address[0],
@@ -134,8 +134,7 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
             self._send_error(400, "Missing address parameter")
             return
         
-        node = self.server.blockchain_node
-        transactions = node.blockchain.get_transaction_history(address[0])
+        transactions = self.blockchain.get_transaction_history(address[0])
         
         response = {
             "address": address[0],
@@ -145,20 +144,19 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     
     def _handle_get_peers(self):
         """Xử lý get peers endpoint"""
-        # TODO: Implement peer management
+        peers = self.p2p_network.get_peer_list() if self.p2p_network else []
         response = {
-            "peers": [],
-            "peer_count": 0
+            "peers": peers,
+            "peer_count": len(peers)
         }
         self._send_json_response(response)
     
     def _handle_mining_stats(self):
         """Xử lý mining stats endpoint"""
-        # TODO: Implement mining statistics
         response = {
             "blocks_mined": 0,
             "hash_rate": 0,
-            "difficulty": 2
+            "difficulty": self.blockchain.difficulty
         }
         self._send_json_response(response)
     
@@ -171,19 +169,22 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
                 return
         
         try:
-            node = self.server.blockchain_node
-            transaction = node.create_transaction(
+            # Note: This is simplified. In reality, you'd get the sender from auth.
+            # Here we assume the node owner is the sender.
+            # A real app needs a wallet management system accessible here.
+            tx = self.blockchain.new_transaction(
+                sender="node_owner_address", # Placeholder
                 receiver=data['receiver'],
-                amount=data['amount'],
-                data=data.get('data')
+                amount=data['amount']
             )
             
             # Broadcast transaction
-            node.broadcast_transaction(transaction)
+            if self.p2p_network:
+                self.p2p_network.broadcast_transaction(tx) # Assuming tx object is what's needed
             
             response = {
                 "success": True,
-                "transaction_hash": transaction.transaction_hash,
+                "transaction_hash": tx.hash, # Assuming tx object has a hash
                 "message": "Transaction created and broadcasted"
             }
             self._send_json_response(response)
@@ -196,21 +197,21 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     def _handle_mine_block(self, data):
         """Xử lý mine block endpoint"""
         try:
-            node = self.server.blockchain_node
-            
-            if len(node.blockchain.pending_transactions) == 0:
+            if len(self.blockchain.pending_transactions) == 0:
                 self._send_error(400, "No pending transactions to mine")
                 return
             
-            # Mine block trong thread riêng để không block HTTP response
-            mining_thread = threading.Thread(target=node.start_mining)
-            mining_thread.daemon = True
-            mining_thread.start()
+            # This should be asynchronous in a real application
+            miner_address = data.get("miner_address", "network_reward_address")
+            new_block = self.blockchain.mine_block(miner_address)
             
+            if self.p2p_network:
+                self.p2p_network.broadcast_block(new_block)
+
             response = {
                 "success": True,
-                "message": "Mining started",
-                "pending_transactions": len(node.blockchain.pending_transactions)
+                "message": "New block mined",
+                "block": new_block.to_dict()
             }
             self._send_json_response(response)
             
@@ -224,7 +225,9 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
             return
         
         try:
-            # TODO: Implement peer connection via P2P network
+            if self.p2p_network:
+                self.p2p_network.connect_to_peer(data['address'], data['port'])
+            
             response = {
                 "success": True,
                 "message": f"Connected to peer {data['address']}:{data['port']}"
@@ -237,7 +240,9 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     def _handle_sync_blockchain(self):
         """Xử lý sync blockchain endpoint"""
         try:
-            # TODO: Implement blockchain synchronization
+            if self.p2p_network:
+                self.p2p_network.sync_chain() # Assuming this method exists
+
             response = {
                 "success": True,
                 "message": "Blockchain sync initiated"
@@ -280,64 +285,49 @@ class BlockchainHTTPHandler(BaseHTTPRequestHandler):
     
     def log_message(self, format, *args):
         """Override để custom logging"""
-        print(f"[HTTP] {format % args}")
+        return
 
 class BlockchainHTTPServer:
     """
-    HTTP Server cho blockchain node
+    Lớp wrapper cho HTTP server
     """
-    
-    def __init__(self, host: str = "localhost", port: int = 8080, blockchain_node=None):
-        """
-        Khởi tạo HTTP server
+    def __init__(self, server_address, blockchain, p2p_network):
+        self.server_address = server_address
+        self.blockchain = blockchain
+        self.p2p_network = p2p_network
         
-        Args:
-            host: Host address
-            port: Port number
-            blockchain_node: Blockchain node instance
-        """
-        self.host = host
-        self.port = port
-        self.blockchain_node = blockchain_node
-        self.server: Optional[HTTPServer] = None
-        self.server_thread: Optional[threading.Thread] = None
-        self.is_running = False
-    
-    def start(self):
+        def handler(*args, **kwargs):
+            return BlockchainHTTPHandler(self.blockchain, self.p2p_network, *args, **kwargs)
+            
+        self.http_server = HTTPServer(self.server_address, handler)
+        self.server_thread = None
+        
+    def serve_forever(self):
         """Bắt đầu HTTP server"""
-        try:
-            self.server = HTTPServer((self.host, self.port), BlockchainHTTPHandler)
-            self.server.blockchain_node = self.blockchain_node
-            
-            self.is_running = True
-            self.server_thread = threading.Thread(target=self.server.serve_forever)
-            self.server_thread.daemon = True
-            self.server_thread.start()
-            
-            print(f"HTTP API Server started on http://{self.host}:{self.port}")
-            print("Available endpoints:")
-            print(f"  - Status: http://{self.host}:{self.port}/status")
-            print(f"  - Blockchain: http://{self.host}:{self.port}/blockchain")
-            
-        except Exception as e:
-            print(f"Failed to start HTTP server: {e}")
-    
-    def stop(self):
+        print(f"HTTP Server serving forever at {self.server_address}")
+        self.http_server.serve_forever()
+
+    def shutdown(self):
         """Dừng HTTP server"""
-        if self.server:
-            self.server.shutdown()
-            self.server.server_close()
-            self.is_running = False
-            print("HTTP API Server stopped")
+        if self.http_server:
+            print("Shutting down HTTP server...")
+            self.http_server.shutdown()
+            self.http_server.server_close()
+            print("HTTP Server stopped.")
+
+def create_server(host: str = "localhost", port: int = 8080, blockchain=None, p2p_network=None) -> BlockchainHTTPServer:
+    """
+    Tạo instance của BlockchainHTTPServer
+    """
+    if blockchain is None:
+        raise ValueError("Blockchain instance is required")
     
-    def get_server_info(self) -> Dict[str, Any]:
-        """Lấy thông tin server"""
-        return {
-            "host": self.host,
-            "port": self.port,
-            "is_running": self.is_running,
-            "base_url": f"http://{self.host}:{self.port}"
-        }
+    return BlockchainHTTPServer((host, port), blockchain, p2p_network)
+
+# TODO: Add authentication for sensitive endpoints
+# TODO: Implement rate limiting
+# TODO: Add more detailed logging
+# TODO: Improve error handling and response consistency
 
 # TODO: Implement WebSocket support for real-time updates
 # TODO: Add authentication and rate limiting

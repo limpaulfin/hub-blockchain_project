@@ -8,6 +8,7 @@ Dependencies: core/transaction.py, utils/crypto.py
 
 import hashlib
 import json
+import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 from .transaction import Transaction
@@ -24,6 +25,7 @@ class Block:
         merkle_root (str): Root của Merkle tree
         nonce (int): Số dùng trong proof of work
         hash (str): Hash của block hiện tại
+        difficulty (int): Độ khó của block
     """
     
     def __init__(self, index: int, transactions: List[Transaction], previous_hash: str):
@@ -37,11 +39,12 @@ class Block:
         """
         self.index = index
         self.transactions = transactions
-        self.timestamp = datetime.now().isoformat()
+        self.timestamp = time.time()
         self.previous_hash = previous_hash
         self.merkle_root = self.calculate_merkle_root()
         self.nonce = 0
         self.hash = self.calculate_hash()
+        self.difficulty = 0
     
     def calculate_hash(self) -> str:
         """
@@ -52,11 +55,10 @@ class Block:
         """
         block_string = json.dumps({
             'index': self.index,
-            'timestamp': self.timestamp,
+            'timestamp': str(self.timestamp),
             'previous_hash': self.previous_hash,
             'merkle_root': self.merkle_root,
-            'nonce': self.nonce,
-            'transactions_count': len(self.transactions)
+            'nonce': self.nonce
         }, sort_keys=True)
         
         return hashlib.sha256(block_string.encode()).hexdigest()
@@ -98,13 +100,14 @@ class Block:
         Args:
             difficulty: Số lượng số 0 đầu tiên trong hash
         """
+        self.difficulty = difficulty
         target = "0" * difficulty
         
         while not self.hash.startswith(target):
             self.nonce += 1
             self.hash = self.calculate_hash()
         
-        print(f"Block mined: {self.hash}")
+        print(f"Block mined: {self.hash} / Đã đào xong khối: {self.hash}")
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -119,6 +122,7 @@ class Block:
             'previous_hash': self.previous_hash,
             'merkle_root': self.merkle_root,
             'nonce': self.nonce,
+            'difficulty': self.difficulty,
             'hash': self.hash,
             'transactions': [tx.to_dict() for tx in self.transactions]
         }
@@ -133,19 +137,23 @@ class Block:
         Returns:
             bool: True nếu block hợp lệ
         """
-        # Kiểm tra hash của block
+        # 1. Kiểm tra hash của chính nó có đúng không
         if self.hash != self.calculate_hash():
             return False
+            
+        # 2. Kiểm tra Proof of Work
+        if not self.hash.startswith("0" * self.difficulty):
+            return False
         
-        # Kiểm tra merkle root
+        # 3. Kiểm tra liên kết với block trước
+        if previous_block and self.previous_hash != previous_block.hash:
+            return False
+            
+        # 4. Kiểm tra Merkle Root
         if self.merkle_root != self.calculate_merkle_root():
             return False
         
-        # Kiểm tra liên kết với block trước
-        if previous_block and self.previous_hash != previous_block.hash:
-            return False
-        
-        # Kiểm tra tính hợp lệ của tất cả giao dịch
+        # 5. Kiểm tra tính hợp lệ của tất cả giao dịch
         for transaction in self.transactions:
             if not transaction.is_valid():
                 return False

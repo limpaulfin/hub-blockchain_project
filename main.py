@@ -38,15 +38,15 @@ def interactive_cli(blockchain: Blockchain, p2p_network: P2PNetwork):
     """
     Interactive command-line interface for blockchain
     """
-    print("\n🚀 Hub Blockchain Interactive CLI")
-    print("===================================")
-    print("Commands: mine, transaction, chain, status, wallets, help, exit")
+    print("\n🚀 Hub Blockchain Interactive CLI (Giao diện dòng lệnh tương tác)")
+    print("===================================================================")
+    print("Commands (Lệnh): mine, transaction, chain, status, wallets, help, exit")
 
     while True:
         command = input("> ").strip().lower()
 
         if command == "exit":
-            print("Exiting...")
+            print("Exiting... / Đang thoát...")
             # TODO: Graceful shutdown
             sys.exit(0)
         
@@ -56,27 +56,29 @@ def interactive_cli(blockchain: Blockchain, p2p_network: P2PNetwork):
         elif command == "mine":
             miner_wallet = wallet_manager.get_wallet("miner")
             if not miner_wallet:
+                print("Creating miner wallet... / Đang tạo ví cho thợ đào...")
                 miner_wallet = wallet_manager.create_wallet("miner")
             
-            new_block = blockchain.mine_block(miner_wallet['address'])
+            print("Mining a new block... / Đang đào khối mới...")
+            new_block = blockchain.mine_pending_transactions(miner_wallet['address'])
             if new_block:
-                print(f"🎉 New block mined: #{new_block.index}")
+                print(f"🎉 New block mined: #{new_block.index} / Đã đào xong khối mới: #{new_block.index}")
                 p2p_network.broadcast_block(new_block)
                 BlockchainVisualizer.print_block(new_block)
             else:
-                print("No transactions to mine.")
+                print("No transactions to mine. / Không có giao dịch để đào.")
 
         elif command == "transaction":
             try:
-                sender_name = input("  Sender wallet name: ")
-                receiver_name = input("  Receiver wallet name: ")
-                amount = float(input("  Amount: "))
+                sender_name = input("  Sender wallet name / Tên ví người gửi: ")
+                receiver_name = input("  Receiver wallet name / Tên ví người nhận: ")
+                amount = float(input("  Amount / Số lượng: "))
 
                 sender_wallet = wallet_manager.get_wallet(sender_name)
                 receiver_wallet = wallet_manager.get_wallet(receiver_name)
 
                 if not sender_wallet or not receiver_wallet:
-                    print("Sender or receiver wallet not found.")
+                    print("Sender or receiver wallet not found. / Không tìm thấy ví người gửi hoặc người nhận.")
                     continue
 
                 tx = Transaction(
@@ -87,15 +89,15 @@ def interactive_cli(blockchain: Blockchain, p2p_network: P2PNetwork):
                 )
                 
                 if blockchain.add_transaction(tx):
-                    print("Transaction added to mempool.")
+                    print("Transaction added to mempool. / Đã thêm giao dịch vào vùng chờ.")
                     p2p_network.broadcast_transaction(tx)
                 else:
-                    print("Failed to add transaction.")
+                    print("Failed to add transaction. / Thêm giao dịch thất bại.")
 
             except ValueError:
-                print("Invalid amount.")
+                print("Invalid amount. / Số lượng không hợp lệ.")
             except Exception as e:
-                print(f"Error creating transaction: {e}")
+                print(f"Error creating transaction: {e} / Lỗi khi tạo giao dịch: {e}")
 
         elif command == "chain":
             BlockchainVisualizer.print_chain(blockchain)
@@ -104,47 +106,47 @@ def interactive_cli(blockchain: Blockchain, p2p_network: P2PNetwork):
             BlockchainAnalyzer.print_status(blockchain)
 
         elif command == "wallets":
-            print("Wallets:")
+            print("Wallets / Các ví:")
             for name, address in wallet_manager.list_wallets().items():
                 print(f"  - {name}: {address}")
 
         else:
-            print(f"Unknown command: '{command}'. Type 'help' for options.")
+            print(f"Unknown command: '{command}'. Type 'help' for options. / Lệnh không xác định: '{command}'. Gõ 'help' để xem các tùy chọn.")
 
 def print_help():
     """Prints help message for CLI"""
-    print("\nHub Blockchain CLI Help")
-    print("---------------------")
-    print("  mine         - Mine a new block")
-    print("  transaction  - Create a new transaction")
-    print("  chain        - Display the entire blockchain")
-    print("  status       - Show blockchain status")
-    print("  wallets      - List all wallets")
-    print("  help         - Show this help message")
-    print("  exit         - Exit the application")
-    print("---------------------\n")
+    print("\nHub Blockchain CLI Help / Trợ giúp")
+    print("---------------------------------")
+    print("  mine         - Mine a new block / Đào một khối mới")
+    print("  transaction  - Create a new transaction / Tạo giao dịch mới")
+    print("  chain        - Display the entire blockchain / Hiển thị toàn bộ chuỗi khối")
+    print("  status       - Show blockchain status / Hiển thị trạng thái chuỗi khối")
+    print("  wallets      - List all wallets / Liệt kê các ví")
+    print("  help         - Show this help message / Hiển thị thông báo này")
+    print("  exit         - Exit the application / Thoát ứng dụng")
+    print("---------------------------------\n")
 
 def demo_mode():
     """
     Runs a non-interactive demo of the blockchain
     """
-    print("🚀 Running Blockchain Demo Mode...")
+    print("🚀 Running Blockchain Demo Mode... / Chạy chế độ demo...")
     
     # 1. Initialize blockchain
     blockchain = Blockchain()
-    print("Blockchain initialized.")
+    print("Blockchain initialized. / Đã khởi tạo chuỗi khối.")
     
     # 2. Create wallets
     wallet_manager.create_wallet("miner")
     wallet_manager.create_wallet("alice")
     wallet_manager.create_wallet("bob")
     
-    print("\nWallets created:")
+    print("\nWallets created: / Các ví đã tạo:")
     for name, info in wallet_manager.list_wallets().items():
         print(f"  - {name}: {info}")
     
     # 3. Create transactions
-    print("\nCreating transactions...")
+    print("\nCreating transactions... / Đang tạo giao dịch...")
     alice_wallet = wallet_manager.get_wallet("alice")
     bob_wallet = wallet_manager.get_wallet("bob")
     
@@ -153,19 +155,19 @@ def demo_mode():
     
     blockchain.add_transaction(tx1)
     blockchain.add_transaction(tx2)
-    print("2 transactions added to mempool.")
+    print("2 transactions added to mempool. / 2 giao dịch đã được thêm vào vùng chờ.")
     
     # 4. Mine a block
-    print("\nMining a block...")
+    print("\nMining a block... / Đang đào khối...")
     miner_wallet = wallet_manager.get_wallet("miner")
-    blockchain.mine_block(miner_wallet['address'])
+    blockchain.mine_pending_transactions(miner_wallet['address'])
     
     # 5. Visualize the chain
     BlockchainVisualizer.print_chain(blockchain)
     
     # 6. Check status
     BlockchainAnalyzer.print_status(blockchain)
-    print("\n✅ Demo finished.")
+    print("\n✅ Demo finished. / Hoàn thành demo.")
 
 def mining_mode():
     """Continuous mining mode"""
@@ -193,19 +195,19 @@ def main():
     
     # Load data
     try:
-        chain_data = FileUtils.load_json(config.get_blockchain_file_path())
+        chain_data = FileUtils.load_json(config.storage.blockchain_file)
         if chain_data:
-            blockchain.chain = [blockchain.block_from_dict(b) for b in chain_data]
+            blockchain.chain = [Blockchain.block_from_dict(b) for b in chain_data]
         
-        wallet_data = FileUtils.load_json(config.get_wallet_file_path())
+        wallet_data = FileUtils.load_json(config.storage.wallets_file)
         if wallet_data:
             wallet_manager.wallets = wallet_data
             
     except Exception as e:
-        print(f"Could not load data: {e}. Starting with a fresh blockchain.")
+        print(f"Could not load data: {e}. Starting with a fresh blockchain. / Không thể tải dữ liệu. Bắt đầu với chuỗi khối mới.")
 
     # P2P Network
-    p2p_network = P2PNetwork(blockchain)
+    p2p_network = P2PNetwork(blockchain, host=config.network.p2p_host, port=config.network.p2p_port)
     p2p_thread = threading.Thread(target=p2p_network.start)
     p2p_thread.daemon = True
     p2p_thread.start()
@@ -226,15 +228,15 @@ def main():
     try:
         interactive_cli(blockchain, p2p_network)
     except KeyboardInterrupt:
-        print("\nShutting down...")
+        print("\nShutting down... / Đang tắt...")
     finally:
         if config.storage.auto_save:
-            FileUtils.save_json(config.get_blockchain_file_path(), [b.to_dict() for b in blockchain.chain])
-            FileUtils.save_json(config.get_wallet_file_path(), wallet_manager.wallets)
+            FileUtils.save_json(config.storage.blockchain_file, [b.to_dict() for b in blockchain.chain])
+            FileUtils.save_json(config.storage.wallets_file, wallet_manager.wallets)
         
         http_server.shutdown()
-        # p2p_network.stop() # TODO: Implement graceful shutdown
-        print("Shutdown complete.")
+        p2p_network.stop()
+        print("Shutdown complete. / Tắt hoàn tất.")
 
 if __name__ == "__main__":
     main() 

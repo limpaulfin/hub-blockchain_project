@@ -96,6 +96,27 @@ class Blockchain:
         
         return block
     
+    def add_block(self, block: Block) -> bool:
+        """
+        Thêm một block nhận từ mạng vào chuỗi (sau khi xác thực)
+        
+        Returns:
+            bool: True nếu thêm thành công
+        """
+        latest_block = self.get_latest_block()
+        if block.is_valid(latest_block):
+            self.chain.append(block)
+            self.clear_transactions_from_mempool(block.transactions)
+            return True
+        return False
+
+    def clear_transactions_from_mempool(self, mined_transactions: List[Transaction]):
+        """Xóa các giao dịch đã được đào khỏi mempool."""
+        mined_tx_hashes = {tx.transaction_hash for tx in mined_transactions}
+        self.pending_transactions = [
+            tx for tx in self.pending_transactions if tx.transaction_hash not in mined_tx_hashes
+        ]
+
     def get_balance(self, address: str) -> float:
         """
         Tính số dư của một địa chỉ
@@ -139,6 +160,22 @@ class Blockchain:
         
         return True
     
+    @staticmethod
+    def block_from_dict(block_data: Dict[str, Any]) -> Block:
+        """Tạo đối tượng Block từ dictionary."""
+        transactions = [Transaction.from_dict(tx) for tx in block_data.get('transactions', [])]
+        block = Block(
+            index=block_data['index'],
+            transactions=transactions,
+            previous_hash=block_data['previous_hash']
+        )
+        block.timestamp = block_data['timestamp']
+        block.merkle_root = block_data['merkle_root']
+        block.nonce = block_data['nonce']
+        block.difficulty = block_data['difficulty']
+        block.hash = block_data['hash']
+        return block
+
     def to_dict(self) -> Dict[str, Any]:
         """
         Chuyển đổi blockchain thành dictionary
