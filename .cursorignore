@@ -39,20 +39,13 @@ wheels/
 
 # Blockchain data
 data/
-blockchain.json
-wallets.json
+# blockchain.json
+# wallets.json
 *.wallet
 *.keys
 nodes/
 peers.json
 
-# Logs
-logs/
-*.log
-*.log.*
-mining.log
-network.log
-p2p.log
 
 # Temporary files
 *.tmp
@@ -276,10 +269,6 @@ yarn-error.log*
 # ===============================================
 # Cursor Specific
 # ===============================================
-
-# Cursor settings (keep some, ignore others)
-.cursor/
-.cursorrules
 
 # ===============================================
 # Project Specific Exclusions
