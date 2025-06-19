@@ -1,0 +1,189 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Fong on 2025-06-15--19-18-PM*
+
+# Smart Long File Reading Rule
+
+## Mục đích
+Hướng dẫn AI đọc file dài (>200 dòng) với:
+- Window sliding (overlap 20 dòng)
+- Smart grep prioritization
+- Đọc tuần tự đảm bảo không bỏ sót
+
+## Khi nào áp dụng
+- File có >200 dòng
+- Yêu cầu "đọc toàn bộ file" hoặc "analyze entire file"
+- AI hit giới hạn 200 dòng của read_file tool
+
+## Quy trình: Smart + Sequential Reading
+
+### Bước 0: Smart Grep (BẮT BUỘC TRƯỚC)
+```bash
+# 1. Keywords quan trọng
+grep -n -i -E "important|critical|error|warning|main|function|class|def|TODO|FIXME|NOTE|BUG" file.txt | head -n 50 | cat
+
+# 2. Theo loại file:
+# Code files:
+grep -n -E "^(function|def|class|interface|export|import)" file.js | cat
+
+# Config files:
+grep -n -E "^[[:space:]]*[^#].*=" config.txt | head -n 30 | cat
+
+# Log files:
+grep -n -E "(ERROR|FATAL|CRITICAL)" logfile.txt | tail -n 50 | cat
+
+# 3. Patterns theo context:
+grep -n -i -E "config|setting|api|key|password|url|path|database|connection" file.txt | head -n 30 | cat
+```
+
+### Bước 1: Kiểm tra file
+```bash
+wc -l file.txt
+```
+
+### Bước 2: Sliding Window Reading (Overlap 20 dòng)
+```bash
+# Batch 1: 1-200
+sed -n '1,200p' file.txt | cat
+
+# Batch 2: 181-380 (overlap 181-200)
+sed -n '181,380p' file.txt | cat
+
+# Batch 3: 361-560 (overlap 361-380)
+sed -n '361,560p' file.txt | cat
+
+# Batch N: Continue pattern
+sed -n '541,$p' file.txt | cat
+```
+
+### Bước 3: Track Progress
+Sau mỗi batch ghi nhận:
+- Dòng đã đọc + overlap range
+- Tóm tắt nội dung quan trọng
+- Xác định cần đọc tiếp không
+
+## Smart Grep Patterns
+
+### Source Code:
+```bash
+# Functions & classes
+grep -n -E "^[[:space:]]*(function|def|class|interface|export|import|const|let|var)" file.js | cat
+
+# Error handling
+grep -n -i -E "(try|catch|throw|error|exception)" file.js | cat
+```
+
+### Config Files:
+```bash
+grep -n -E "^[[:space:]]*[^#].*[=:]" config.txt | cat
+```
+
+### Log Files:
+```bash
+grep -n -E "(ERROR|FATAL|CRITICAL|WARNING)" logfile.txt | tail -n 100 | cat
+```
+
+### Documentation:
+```bash
+grep -n -E "^#+|^=+|^-+|^\*+" readme.md | cat
+```
+
+## Window Sliding Formula
+```bash
+# Batch 1: 1 to 200
+# Batch 2: 181 to 380 (overlap: 181-200)
+# Batch 3: 361 to 560 (overlap: 361-380)
+# Template: Batch n starts at (n-1)*180 + 1
+```
+
+## Commands Tham Khảo
+
+### File Info:
+```bash
+wc -l file.txt
+file file.txt
+ls -lh file.txt
+head -n 5 file.txt | cat
+tail -n 5 file.txt | cat
+```
+
+### Advanced Grep:
+```bash
+# Context search (5 lines before/after)
+grep -A 5 -B 5 "pattern" file.txt | cat
+
+# Multiple patterns với line numbers
+grep -n -E "pattern1|pattern2|pattern3" file.txt | cat
+
+# Case-insensitive
+grep -i -n --color=always "keyword" file.txt | cat
+```
+
+## Quy Tắc Bắt Buộc
+
+### 1. Luôn pipe với `| cat`
+Tránh paging behavior.
+
+### 2. Smart grep TRƯỚC sequential reading
+Bước 0 là BẮT BUỘC.
+
+### 3. Track overlap windows
+```bash
+echo "Reading batch 2 (lines 181-380, overlap: 181-200)" >> progress.tmp
+```
+
+### 4. File đặc biệt:
+
+**JSON/JSONL:**
+```bash
+grep -n '"[^"]*"[[:space:]]*:' file.json | head -n 30 | cat
+sed -n '1,200p' file.json | jq '.' 2>/dev/null || echo "Processing JSON batch"
+```
+
+**Log với timestamp:**
+```bash
+grep -n -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}' logfile.log | head -n 10 | cat
+```
+
+## Workflow Example (850 lines)
+
+### Smart Grep:
+```bash
+grep -n -i -E "function|class|import|export|TODO|ERROR" file.js | head -n 30 | cat
+```
+
+### Sliding Window:
+```bash
+sed -n '1,200p' file.js | cat      # Batch 1: 1-200
+sed -n '181,380p' file.js | cat    # Batch 2: 181-380
+sed -n '361,560p' file.js | cat    # Batch 3: 361-560
+sed -n '541,740p' file.js | cat    # Batch 4: 541-740
+sed -n '721,$p' file.js | cat      # Batch 5: 721-850
+```
+
+## Lưu Ý Quan Trọng
+
+1. **Smart grep TRƯỚC** - Tìm key content
+2. **20 dòng overlap** - Đảm bảo context
+3. **Track overlap** - Tránh nhầm lẫn
+4. **Sequential order** - Đọc từ đầu đến cuối
+5. **Content awareness** - Adjust patterns theo file type
+
+## Troubleshooting
+
+### File rất lớn (>1GB):
+```bash
+sed -n '1,100p' file.txt | cat     # 100-line batches
+sed -n '91,190p' file.txt | cat    # 10-line overlap
+```
+
+### Memory issues:
+```bash
+sed -n '1,150p' file.txt | cat
+sed -n '131,280p' file.txt | cat   # 20-line overlap maintained
+```
+
+Rule này đảm bảo AI đọc hiệu quả với smart prioritization và context continuity.

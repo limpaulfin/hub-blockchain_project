@@ -1,0 +1,137 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Quy Tắc Nghiên Cứu Internet Học Thuật
+
+*Mod by Fong on 2025-06-15--19-22-PM*
+
+## Mục đích
+Hướng dẫn AI nghiên cứu internet với tiêu chuẩn học thuật cao, nguồn đáng tin cậy, trích dẫn APA quốc tế và tuân thủ tiêu chuẩn Việt Nam.
+
+## Nguồn đáng tin cậy
+
+**Tier 1 (Ưu tiên cao)**:
+- Tạp chí khoa học peer-review (ScienceDirect, IEEE, ACM)
+- Báo cáo tổ chức uy tín (World Bank, McKinsey, Deloitte)
+- Sách học thuật (Springer, Elsevier, Wiley)
+- **Việt Nam**: Tạp chí ĐHQGHN, báo cáo VEA/CIEM
+
+**Tier 2 (Chấp nhận)**:
+- Báo cáo công ty công nghệ (IBM, Microsoft, Google)
+- Trang chuyên ngành (Harvard Business Review, MIT Tech Review)
+- **Việt Nam**: VCCI, VEPR, FiinGroup, Tổng cục Thống kê, các ĐH
+
+**TRÁNH**: Wikipedia, blog cá nhân, tin tức không nguồn, mạng xã hội
+
+## Quy trình tìm kiếm
+
+### 1. Từ khóa
+- Tiếng Anh chuyên môn + tiếng Việt cho trong nước
+- Boolean: "blockchain AND supply chain AND transparency"
+- Việt Nam: "blockchain AND chuỗi cung ứng AND Việt Nam"
+
+### 2. Cơ sở dữ liệu
+**Quốc tế**: Google Scholar → ResearchGate → JSTOR → IEEE → ScienceDirect
+**Việt Nam**: vista.gov.vn → Thư viện ĐH → Tạp chí khoa học
+
+### 3. Đánh giá
+- Tác giả có chuyên môn
+- Xuất bản ≤5 năm
+- Phương pháp rõ ràng
+- **Việt Nam**: Kiểm tra uy tín tổ chức
+
+## Trích dẫn APA 7th Edition
+
+### In-text Citation
+- Một tác giả: (Smith, 2023) / Smith (2023)
+- Hai tác giả: (Smith & Johnson, 2023)
+- Ba+: (Smith et al., 2023)
+- **Việt Nam**: (Nguyễn, 2023) / (Nguyễn & Trần, 2023)
+- Trực tiếp: "quote" (Smith, 2023, p. 45)
+
+### References
+**Tạp chí quốc tế**:
+```
+Smith, J. A. (2023). Title. Journal Name, 15(3), 234-251. https://doi.org/10.1000/xyz123
+```
+
+**Tạp chí Việt Nam**:
+```
+Nguyễn, V. A. (2023). Tiêu đề. Tạp chí Khoa học ĐHQGHN: Kinh tế, 39(2), 45-58.
+```
+
+**Báo cáo**:
+```
+VCCI. (2023). Báo cáo kinh tế số 2023. https://www.vcci.com.vn/report-2023
+```
+
+## Quy trình 5 bước
+
+1. **Kế hoạch**: Câu hỏi + từ khóa (Anh/Việt) + 10-15 nguồn + 60% quốc tế/40% VN
+2. **Thu thập**: Tìm theo ưu tiên + nguồn VN cho bối cảnh + lưu đầy đủ
+3. **Đánh giá**: Tin cậy + VN từ tổ chức uy tín + loại bỏ không đạt
+4. **Phân tích**: Nhóm chủ đề + so sánh quốc tế/VN + tìm tranh luận
+5. **Viết**: Paraphrase + dịch chính xác + trích dẫn đầy đủ + cân bằng
+
+## Đánh giá nguồn (≥15/25 điểm)
+
+| Tiêu chí | Điểm 1-5 |
+|----------|----------|
+| Uy tín tác giả/tổ chức | |
+| Độ mới (≤5 năm) | |
+| Chất lượng phương pháp | |
+| Liên quan với VN | |
+| Số trích dẫn | |
+
+## Lưu ý Việt Nam
+
+### Công nghệ mới
+- Whitepaper chính thức + báo cáo tư vấn + **chính sách Chính phủ VN**
+
+### Thị trường VN
+- **Bắt buộc**: VCCI, VEPR, Tổng cục Thống kê
+- **Case study**: VinGroup, FPT, Viettel
+
+### Nguồn tiếng Việt
+- **Không dịch** khi trích dẫn trực tiếp VN
+- Dịch sang Anh + "[Bản dịch của tác giả]"
+- **Dấu thanh chính xác** tên tác giả VN
+
+### Tiêu chuẩn VN
+- Tuân thủ Bộ GD&ĐT
+- Ngôn ngữ học thuật chuẩn mực
+- Tránh lóng, viết tắt
+- Tính khách quan
+
+## Checklist
+
+**Nguồn**:
+- [ ] Tier 1/2 only
+- [ ] 70% ≤5 năm
+- [ ] 30-40% nguồn VN
+- [ ] 2-3 nguồn/luận điểm
+- [ ] Case study VN
+
+**Trích dẫn**:
+- [ ] APA chính xác
+- [ ] Tên VN có dấu
+- [ ] ≤40 từ trực tiếp
+- [ ] Paraphrase đúng
+
+**Học thuật**:
+- [ ] Ngôn ngữ khách quan
+- [ ] So sánh quốc tế/VN
+- [ ] Phân tích đa chiều
+- [ ] Phù hợp bối cảnh VN
+- [ ] Tuân thủ Bộ GD&ĐT
+
+## Ví dụ
+
+**KHÔNG đạt**: "Blockchain tốt cho chuỗi cung ứng VN. Nhiều công ty dùng."
+
+**ĐẠT chuẩn**: "Zhang et al. (2023) cho thấy blockchain cải thiện minh bạch 85%. McKinsey (2022) báo cáo 73% Fortune 500 triển khai. **Tại VN, Nguyễn & Trần (2023) tại NEU chỉ ra khó khăn về nhân lực và chi phí. VCCI (2023) xác nhận thách thức chuyển đổi số SME VN.** Smith (2023) cảnh báo phức tạp kỹ thuật cho SME."
+
+---
+**Ghi nhớ**: Chất lượng > số lượng. Ưu tiên tin cậy + học thuật + phù hợp VN.

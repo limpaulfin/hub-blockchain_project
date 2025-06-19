@@ -1,0 +1,389 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+**Phiên bản:** 1.1.4  
+**Cập nhật:** 2025-05-08--05-40-pm
+
+## Nguyên tắc chung
+
+- **Vị trí lưu trữ:** Luôn CRUD (Create, Read, Update, Delete) trí nhớ dự án vào thư mục `.memory/*` bên trong thư mục gốc (thư mục hiện tại `.`), sử dụng đường dẫn tương đối từ thư mục gốc đó.
+- **Vị trí chính xác:** Thư mục `.memory` PHẢI nằm bên trong thư mục gốc (thư mục hiện tại `.`), TUYỆT ĐỐI KHÔNG được tạo ở thư mục khác.
+- **Định dạng:** AI có toàn quyền quyết định lựa chọn định dạng file (`.json` hoặc `.md`) dựa trên bản chất và cấu trúc của dữ liệu:
+  - File JSON (pretty-printed, indent 2 spaces): cho dữ liệu có cấu trúc, metadata, configs
+  - File Markdown (.md): cho ghi chú chứa mã nguồn, khối code, giải thích dài, hoặc nội dung văn bản cần định dạng rõ ràng
+  - TUYỆT ĐỐI KHÔNG sử dụng comments trong file JSON
+- **Giới hạn kích thước file:** Mỗi file nên giới hạn ở ngưỡng dưới 200 LOC hoặc 50,000 ký tự / 12,000 tokens để dễ quản lý
+- **Ngoại lệ tài liệu:** Các file Markdown trong `.memory/` KHÔNG được tự động thêm các dòng chữ ký (~ from rules...)
+- **Single Source of Truth (SSoT):** Mọi thông tin, đặc biệt là dữ liệu cốt lõi và quyết định kiến trúc, PHẢI có một nguồn duy nhất, rõ ràng và được công nhận
+
+## Quét/Rà Soát Trước Khi CRUD (Bắt buộc)
+
+Trước khi thực hiện bất kỳ thao tác CRUD nào (đặc biệt là Create và Update), **BẮT BUỘC** phải quét thư mục `.memory/*` để tìm kiếm thông tin liên quan, đảm bảo nguyên tắc DRY (Don't Repeat Yourself) và Alignment (tính nhất quán).
+
+- Việc quét này **PHẢI** được thực hiện bằng lệnh `grep` với màu sắc, tìm kiếm đệ quy và có các bộ lọc file/thư mục phù hợp.
+- **TUYỆT ĐỐI KHÔNG** sử dụng công cụ tìm kiếm nội bộ (`grep_search` hoặc tương tự)
+- (Tham khảo hướng dẫn chi tiết về phương pháp tìm kiếm trong `rule-get-memory.mdc`)
+
+### Lý do
+
+Đảm bảo không tạo thông tin trùng lặp, xác định xem nên cập nhật file hiện có hay tạo mới, kiểm tra sự tồn tại của các tham chiếu ($ref) liên quan, và đảm bảo thông tin mới/cập nhật nhất quán với bối cảnh hiện có. **Đặc biệt chú trọng tìm kiếm các 'nguồn sự thật' (SOTs) hiện có để tránh tạo ra các bản sao rời rạc. Nếu thông tin liên quan đến một SOT đã có, ưu tiên cập nhật hoặc mở rộng SOT đó thay vì tạo file mới.**
+
+### Các bước thực hiện
+
+1. Xác định các từ khóa liên quan đến thông tin sắp tạo/cập nhật
+2. Thực hiện tìm kiếm "loose" (không phân biệt hoa thường, dùng OR logic `|` trong `grep -E`) bằng `grep` trong terminal.
+3. Phân tích kết quả tìm kiếm để xác định các file/bản ghi có khả năng chứa thông tin liên quan
+4. Đọc nhanh các file/bản ghi đó để đánh giá mức độ liên quan và tính cập nhật
+5. Dựa trên kết quả quét, quyết định: Tạo file mới, Cập nhật file hiện có, hay Tái cấu trúc/gộp thông tin
+
+### Ví dụ lệnh
+
+```bash
+# Tìm kiếm loose cho các từ khóa 'user', 'profile', 'account', 'settings' 
+grep --color=auto -r -i -H -E 'user|profile|account|settings' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+
+# Tìm kiếm theo tag 'authentication' hoặc 'security'
+grep --color=auto -r -i -H -E '"tags":.*("authentication"|"security")' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+## Cấu trúc thư mục
+
+### File `.memory/manifest.json`
+
+File tổng hợp, liệt kê tất cả các file trong bộ nhớ, vị trí (Short-term/Long-term), policy, index và workflow diagram.
+
+### Thư mục `.memory/short-term/`
+
+**Mục đích:** Bộ nhớ ngắn hạn chứa các file liên quan đến trạng thái hiện tại, công việc đang làm, context thao tác, debug, todo, quick-note, test, session, thay đổi thường xuyên.
+
+**Các file ví dụ:**
+- `active-context-*.json`
+- `recent-actions-*.json`
+- `active-file-*.json`
+- `session-summary-*.json`
+
+**Lưu ý:** Thông tin trong bộ nhớ ngắn hạn cần được chuyển sang bộ nhớ dài hạn khi không còn phù hợp. Xem ví dụ file trong `rule-get-memory.mdc`.
+
+**Quy tắc recent_working_files_limit:**
+File active-context-*.json (hoặc file tương đương quản lý trạng thái phiên) NÊN chứa một trường (ví dụ: `recent_working_files`) là một mảng lưu trữ đường dẫn tương đối của tối đa 10 file được làm việc gần đây nhất. Khi thêm file mới vào danh sách đã đủ 30, file cũ nhất (đầu mảng) sẽ bị loại bỏ (FIFO - First-In, First-Out).
+
+### Thư mục `.memory/long-term/` 
+
+**Mục đích:** Bộ nhớ dài hạn chứa các file kiến thức nền tảng, technical note, best practice, mapping, cấu trúc dự án, quyết định kiến trúc, ít thay đổi.
+
+**Nguyên tắc tổ chức:**
+- Nguyên tắc 80/20: 20% thông tin quan trọng nhất (importance >= 0.75) lưu trong `very-important.json`
+- Sắp xếp theo mức độ importance từ cao xuống thấp
+
+**Các file ví dụ:**
+- `very-important-*.json`
+- `projectbrief-*.json`
+- `hooks-map-*-reference-*.json`
+- `shortcode-map-*-reference-*.json`
+- `module-map-*.json`
+- `theme-structure-*-reference-*.json`
+
+**Lưu ý**: Chứa file theo mẫu `very-important-*.json` lưu các thông tin quan trọng nhất (importance >= 0.75). Xem ví dụ file trong `rule-get-memory.mdc`.
+
+### Thư mục `.memory/file-relationships/`
+
+**Mục đích:** Chứa metadata về mối quan hệ giữa các file code trong dự án (imports, exports, dependencies, hooks và các liên kết)
+
+**Nguyên tắc tổ chức:**
+- Mỗi file JS/PHP quan trọng sẽ có file metadata tương ứng (cùng tên nhưng thêm .json)
+- Metadata được lưu dưới dạng JSON, tuân theo cấu trúc chuẩn cho PHP và JS
+
+**Các file ví dụ:**
+- `fong-course-progress-updater.js.json`
+- `fong-user-profile-manager.php.json`
+- `fong-quiz-api.js.json`
+
+**Quy tắc relationship_data_update:**
+Cập nhật metadata mối quan hệ file khi có thay đổi về cấu trúc, import/export, hoặc thêm/sửa function quan trọng. Sử dụng trigger `-> generate relationship data for [file_path]` để tự động tạo/cập nhật metadata.
+
+### Thư mục `.memory/meta/`
+
+**Mục đích:** Chứa Policy, cấu hình, prompt mẫu, và diagram ASCII. Chỉ file diagram ASCII mới được phép là .md trong thư mục con `meta/ascii/`.
+
+**Các file ví dụ:**
+- `memory-structure-diagram.md`
+- `memory-workflow-diagram.md`
+- `prompt-templates.json`
+
+**Lưu ý:** Mỗi diagram ASCII PHẢI lưu trong file .md tại `meta/ascii/`.
+
+**Ghi chú chung:** File `readme.md` trong `.memory` có thể giữ lại để giải thích chung.
+
+## Quy trình CRUD
+
+### Thao tác Read
+
+Khi bắt đầu, đọc `manifest.json` và các file liên quan trong `Short-term`/`Long-term` để có ngữ cảnh.
+
+### Thao tác Create
+
+**Kiểm tra trước:** Thực hiện `preliminary_scan` để đảm bảo thông tin chưa tồn tại (DRY) và xác định xem thông tin có nên được gộp vào một SOT hiện có hay không.
+
+**Xác minh:** Tính nhất quán, phù hợp và thận trọng của thông tin mới.
+
+**Các bước:**
+1. Xác định loại tài liệu và bộ nhớ (Short-term/Long-term)
+2. Đánh giá importance (0.0-1.0) dựa trên tiêu chí (tần suất truy cập, mức độ ảnh hưởng, phạm vi, tính thời sự)
+3. Chọn đúng thư mục
+4. Đặt tên file rõ ràng (tiếng Anh, không dấu, mô tả chức năng). Nếu tạo SOT mới, tên file nên phản ánh rõ SOT đó
+5. Tạo file JSON với metadata chuẩn (description, created_at, updated_at, last_accessed, access_count, importance, related_modules, tags, version, expiration?)
+6. Kiểm tra tính hợp lệ của JSON (không duplicate key, dùng $ref cho trùng lặp, validate bằng JSONLint)
+7. Cập nhật `manifest.json`
+
+### Thao tác Update
+
+**Kiểm tra trước:** Thực hiện `preliminary_scan` để tìm thông tin liên quan, đảm bảo tính nhất quán, tránh trùng lặp và xác định SOT liên quan (nếu có).
+
+**Xác minh:** Tính phù hợp và thận trọng của thay đổi.
+
+**Các bước:**
+1. Kiểm tra version của file
+2. Đọc file hiện tại
+3. Cập nhật metadata (vd: updated_at, last_accessed, access_count, importance nếu có thay đổi)
+4. Cập nhật nội dung. Sử dụng `$ref` nếu cần
+5. Kiểm tra kích thước file, chia nhỏ nếu cần và cập nhật `manifest.json`
+6. Nếu file chuyển trạng thái (thay đổi thường xuyên -> ổn định hoặc ngược lại), cân nhắc di chuyển giữa `Short-term` và `Long-term`, cập nhật `manifest.json`
+7. Kiểm tra tính hợp lệ của JSON
+8. Cân nhắc Peer review cho các thay đổi quan trọng
+
+### Thao tác Delete
+
+**Các bước:**
+1. Xác định file cần xóa
+2. Kiểm tra xem có file nào khác tham chiếu ($ref) đến file này không
+3. Cập nhật các file tham chiếu (nếu có)
+4. Xóa file
+5. Cập nhật `manifest.json`
+
+### Thao tác Move Short-term to Long-term
+
+**Các bước:**
+1. Kiểm tra `.memory/short-term/`
+2. Xác định thông tin không còn phù hợp với ngắn hạn (ít thay đổi, quan trọng lâu dài)
+3. Trích xuất nội dung cần thiết (áp dụng 80/20)
+4. Tạo file mới trong `.memory/long-term/` theo quy trình Create (bao gồm đánh giá lại importance)
+5. Cập nhật `manifest.json`
+6. Xóa file cũ từ `.memory/short-term/`
+
+### Quản lý và Dọn Dẹp Cache Tạm Thời (Short-Term)
+
+**Mô tả:** Quy trình đảm bảo các bản ghi tạm thời trong `.memory/short-term/` (được cache từ long-term) được quản lý hiệu quả và không vi phạm DRY
+
+**Kích hoạt:** Định kỳ (ví dụ: cuối session, hoặc khi bộ nhớ short-term đầy) hoặc khi có cập nhật ở long-term
+
+**Các bước:**
+1. Quét thư mục `.memory/short-term/` tìm các file/bản ghi có metadata `"is_temporary": true`
+2. Đối với mỗi bản ghi tạm thời:
+   - Kiểm tra timestamp `cached_at` hoặc `last_accessed` (nếu có). Nếu quá cũ hoặc không được dùng gần đây, xóa bản ghi tạm thời
+   - Kiểm tra xem thông tin gốc trong `source_file` (long-term) đã bị thay đổi chưa. Nếu đã thay đổi, xóa bản ghi tạm thời (để lần sau cache lại bản mới)
+   - Nếu bản ghi tạm thời có chỉnh sửa/bổ sung so với bản gốc (cần cơ chế đánh dấu), xem xét việc "merge" thay đổi quan trọng trở lại file long-term gốc trước khi xóa bản tạm
+   - Đảm bảo không xóa nhầm các file short-term không phải là cache
+
+**Lưu ý:** Mục tiêu là giữ short-term memory gọn gàng, chứa thông tin thực sự cần thiết cho session hiện tại, và tránh lưu trữ vĩnh viễn thông tin trùng lặp.
+
+> **Lưu ý**: Quy tắc dọn dẹp cache được định nghĩa trong `rule-get-memory.mdc`.
+
+## Các quy tắc cụ thể
+
+### Quy tắc đặt tên file
+
+- Dùng tiếng Anh, mô tả rõ chức năng
+- Không dấu, không ký tự đặc biệt
+- Nếu file đại diện cho một Single Source of Truth (SOT) chính, tên file nên phản ánh điều đó (ví dụ: `sot-user-profile-structure-[timestamp].json`)
+
+### Yêu cầu về metadata
+
+- **Các trường bắt buộc:** title, description, created_at (mảng [human-readable, unix_timestamp]), updated_at (mảng [human-readable, unix_timestamp]), last_accessed, access_count, importance (0.0-1.0), related_modules, tags, version
+  - Định dạng thời gian human-readable là YYYY-MM-DD--HH-MM-pm
+  - Unix timestamp là kiểu integer
+- **BẮT BUỘC:** Trường `tags` phải là một mảng (array) chứa các chuỗi (string) mô tả nội dung file, phục vụ cho việc tìm kiếm. Nên bao gồm tag chỉ rõ SOT (ví dụ: "sot-user-data")
+- **YÊU CẦU TỐI THIỂU:** Mỗi file memory phải có ít nhất **18 tags**, trong đó bao gồm ít nhất **9 tags tiếng Anh** (thuật ngữ kỹ thuật, từ khóa liên quan) và ít nhất **9 tags tiếng Việt** (từ khóa mô tả, dễ tìm bằng tiếng Việt)
+- **YÊU CẦU NGỮ CẢNH (5W1H):** Thông tin trong file (kết hợp giữa metadata và nội dung) PHẢI đủ để trả lời các câu hỏi 5W1H (Who, What, When, Where, Why, How)
+- **Trường tùy chọn:** expiration, related_files
+- Trường `related_files` (nếu có) PHẢI là một mảng (array) các đối tượng (object). Mỗi đối tượng PHẢI chứa 3 khóa (key): `file_name` (string - tên file gốc), `file_location` (string - đường dẫn tương đối từ thư mục `.memory`), và `relationship` (string - mô tả ngắn gọn mối liên hệ)
+- Phải cập nhật metadata (last_accessed, access_count, updated_at) mỗi khi truy cập/sửa đổi
+
+### Quy tắc đặt tên file JSON trong .memory
+
+**Mô tả:** Chuẩn hóa cách đặt tên file JSON trong thư mục .memory/ để đảm bảo tính nhất quán và dễ quản lý
+
+**Nguyên tắc:**
+- Bắt đầu bằng cụm danh từ chính mô tả nội dung (kebab-case)
+- (Tùy chọn) Thêm các từ mô tả ngắn gọn (kebab-case) phía sau nếu cần làm rõ ngữ cảnh
+- Kết thúc bằng dấu gạch ngang `-`, theo sau là Unix timestamp lúc tạo file (số nguyên)
+- Đuôi file là `.json`
+- **Phân biệt `instruction-` và `lesson-learned-`:** 
+  - Nếu ghi nhận **quy trình, các bước thực hiện, hoặc hướng dẫn** để tham khảo sau này: tiền tố `instruction-`
+  - Nếu ghi nhận **sự kiện đã xảy ra, lỗi gặp phải, hoặc kinh nghiệm rút ra** để học hỏi: tiền tố `lesson-learned-`
+
+**Ví dụ:**
+- `session-summary-crud-testing-1746098700.json`
+- `nexiumbot-admin-notice-refactor-1746021600.json`
+- `instruction-defer-okr-task-workflow-1746283500.json`
+- `lesson-learned-file-path-handling-cleanup-1746251646.json`
+
+### Quy tắc xác thực JSON
+
+- Không duplicate key
+- Sử dụng `$ref` cho dữ liệu trùng lặp
+- Validate JSON trước khi lưu (vd: JSONLint)
+
+### Quy tắc đánh giá tầm quan trọng (importance)
+
+**Công thức:** importance = (tần_suất*0.3) + (ảnh_hưởng*0.35) + (phạm_vi*0.25) + (thời_sự*0.1)
+
+**Ngưỡng:**
+- **0.75-1.0:** Lưu trong very-important.json hoặc file riêng với importance cao
+- **0.5-0.74:** Lưu trong file riêng trong long-term/
+- **0.25-0.49:** Lưu trong file chung theo chủ đề
+- **0.0-0.24:** Xem xét việc loại bỏ hoặc tóm tắt
+
+**Lưu ý:** Đánh giá lại importance khi chuyển từ short-term sang long-term hoặc khi có thay đổi lớn
+
+### Quy tắc DRY (Don't Repeat Yourself)
+
+- Mỗi thông tin chỉ nên được lưu một lần tại nguồn sự thật (SOT) của nó
+- Sử dụng `$ref` để tham chiếu đến SOT hoặc các phần của nó từ các file khác khi cần thiết
+- Tái cấu trúc/gộp file nếu cần để củng cố SOT và giảm trùng lặp
+- Định kỳ quét tìm và xử lý trùng lặp, ưu tiên hợp nhất về SOT chính
+
+### Quy tắc Single Responsibility Principle
+
+- Mỗi file memory (đặc biệt trong long-term) nên tập trung vào một chủ đề hoặc trách nhiệm chính, lý tưởng nhất là đóng vai trò một Single Source of Truth (SOT)
+- Tránh tạo các file quá lớn chứa nhiều loại thông tin không liên quan chặt chẽ (file "tạp pí lù")
+- Đặt tên file phản ánh rõ ràng chủ đề/trách nhiệm đó
+- Cân nhắc chia nhỏ file lớn thành các file chuyên biệt hơn khi cần thiết, mỗi file con vẫn phải liên kết rõ ràng với SOT gốc
+
+### Đảm bảo Single Source of Truth và Gom nhóm thông tin (Cohesion)
+
+**Mô tả:** Quy tắc này cụ thể hóa việc triển khai SSoT và tính gắn kết của thông tin
+
+- Mỗi "khái niệm", "thực thể" hoặc "quyết định kiến trúc" cốt lõi của dự án chỉ nên có một "nguồn sự thật" (SOT) chính, được định danh rõ ràng trong bộ nhớ dài hạn
+- Khuyến khích gom nhóm các thông tin có tính gắn kết cao (high cohesion) vào cùng một file JSON (nếu SOT đó đủ nhỏ) hoặc vào một nhóm các file được liên kết chặt chẽ bằng metadata
+- Khi tạo thông tin mới, PHẢI xác định xem nó có thuộc về một SOT hiện có hay không
+- Sử dụng trường `related_files` trong metadata để liên kết rõ ràng các file liên quan
+- Cân nhắc sử dụng một trường metadata như `sot_identifier` hoặc `primary_focus_topic` trong mỗi file memory
+
+### Quy tắc về tính phù hợp (Alignment)
+
+- Thông tin trong memory phải phản ánh đúng codebase/trạng thái dự án. Các SOT phải là nguồn tham chiếu chính xác
+- Định kỳ (vd: sau sprint, hàng tháng) hoặc khi có thay đổi lớn, phải kiểm tra alignment:
+  - So sánh thông tin memory với source code
+  - Kiểm tra file/function/class được đề cập có tồn tại và khớp logic không
+  - Đối chiếu cấu trúc dữ liệu
+  - Gắn tag "verified" và "last_verified_at" sau khi xác minh
+  - Cập nhật hoặc gắn tag "outdated" cho thông tin lỗi thời
+
+### Quy tắc về diagram
+
+- Chỉ lưu diagram ASCII trong `.memory/meta/ascii/` dưới dạng file .md
+- Cập nhật các diagram cấu trúc/workflow (`memory-structure-diagram.md`, `memory-workflow-diagram.md`) khi có thay đổi
+
+### Quy tắc xử lý cache tạm thời
+
+- Các bản ghi cache tạm thời trong short-term PHẢI có metadata rõ ràng (`is_temporary`, `source_file`, `cached_at`)
+- Việc dọn dẹp cache phải được thực hiện định kỳ hoặc theo trigger hợp lý
+- Luôn ưu tiên tính nhất quán dữ liệu và nguyên tắc DRY khi xử lý cache
+
+### Quy tắc về chữ ký đầu ra
+
+- Các dòng chữ ký nguồn rule (ví dụ: ~ from fongtools.mdc, ~ from soul...) chỉ được phép xuất hiện ở output hội thoại, tuyệt đối không được ghi vào bất kỳ file code, JSON, dữ liệu nào. Nếu phát hiện, phải xóa ngay
+
+### Quy tắc giới hạn lịch sử commit
+
+- Trường `git_commit_history` trong `activeContext.json` chỉ được phép lưu tối đa 10 commit hash gần nhất (FIFO). Nếu vượt quá, phải xóa các commit cũ nhất để đảm bảo không vượt ngưỡng
+
+### Quy tắc ghi nhận bài học kinh nghiệm (TIL / Lesson Learned)
+
+**Từ khóa kích hoạt:**
+- ghi nhận bài học
+- TIL
+- ghi lại quy trình
+- note lại cách làm
+- formalize process
+- document steps
+- save procedure
+- log lesson
+- hướng dẫn thực hiện
+- chuẩn hóa thao tác
+- rút ra kinh nghiệm
+- bài học xương máu
+
+**Các bước thực hiện:**
+1. Xác định rõ nội dung bài học cần ghi nhận (có thể hỏi lại người dùng để làm rõ)
+2. Lấy timestamp hiện tại (human-readable và Unix)
+3. Tạo một file JSON mới trong thư mục `.memory/long-term/`
+4. Đặt tên file theo mẫu: `lesson-learned-[topic_kebab_case]-[unix_timestamp].json`
+5. Điền đầy đủ nội dung cho file JSON, tuân thủ cấu trúc chuẩn:
+   - Metadata bắt buộc: `title`, `description`, `created_at`, `updated_at`, `last_accessed`, `access_count`, `importance`, `related_modules`, `tags`, `version`
+   - Nội dung chi tiết (`lesson` section): Phải trả lời đủ 5W1H (Who, What, When, Where, Why, How)
+   - Các bước hành động (`actionable_checklist` section)
+   - Liên kết file liên quan (`related_files` section)
+6. Đảm bảo JSON hợp lệ và được định dạng dễ đọc (pretty-print, indent 2 spaces)
+7. Cập nhật file `manifest.json` (nếu cần thiết theo policy hiện hành)
+
+**Tầm quan trọng:** CAO - Đảm bảo kiến thức và kinh nghiệm được lưu trữ và tái sử dụng hiệu quả
+
+## Quy trình làm mới bộ nhớ (Memory Refresh)
+
+**Mô tả:** Quy trình đảm bảo bộ nhớ luôn Nhất quán (Consistency), Phù hợp (Matching concept), và Cập nhật (Up-to-date)
+
+**Kích hoạt:** Khi nhận được yêu cầu "refresh memory", "update memory", hoặc "align memory"
+
+**Các bước:**
+
+1. **Chuẩn bị**
+   - Tạo/Xóa sạch file log: `.memory/short-term/memory_refresh_log.md`
+   - Ghi timestamp bắt đầu vào log
+
+2. **Quét và căn chỉnh**
+   - Đọc `manifest.json` lấy danh sách file
+   - Duyệt qua **từng file**:
+     - Đọc nội dung
+     - Đối chiếu với codebase/nguồn liên quan
+     - Đánh giá tính chính xác, nhất quán, phù hợp, cập nhật
+     - Cập nhật file nếu cần (theo quy trình Update)
+     - Ghi lại kết quả quét (tên file, đánh giá, thay đổi) vào log
+
+3. **Dọn dẹp cache tạm thời**
+   - Thực hiện quy trình "Cache Maintenance" như mô tả trong phần CRUD workflow
+
+4. **Hoàn tất**
+   - Ghi timestamp kết thúc vào log
+   - Thông báo kết quả cho người dùng (trích dẫn log nếu cần)
+
+## Các phương pháp hay nhất (Best Practices)
+
+- Không tạo file .md trong DKM cũ
+- Chỉ lưu technical note, không lưu thông tin cá nhân
+- Kiểm tra dung lượng file trước khi ghi
+- Cập nhật manifest khi thêm/xóa file
+- Sử dụng công cụ định dạng JSON để đảm bảo file dễ đọc
+- Tuân thủ nguyên tắc 80/20 khi tổ chức `very-important.json`
+- Định kỳ rà soát và tối ưu hệ thống memory
+- Đặt expiration date cho thông tin có tính thời vụ
+
+## Bài học từ tương tác (Interaction Learnings)
+
+**Ngày:** 2025-05-24
+**Mô tả:** Các bài học rút ra từ việc cấu trúc ước tính thời gian học tiếng Đức và quản lý bộ nhớ hiệu quả
+
+### Các điểm chính
+
+- **STRUCT_JSON_AI:** Chuyển đổi thông tin không cấu trúc (Markdown) hoặc bán cấu trúc thành các đối tượng JSON có định nghĩa rõ ràng
+- **PARSE_TO_JSON:** Với dữ liệu có cấu trúc phân cấp, nên chuyển thành cấu trúc JSON thay vì lưu dưới dạng khối văn bản đơn
+- **METADATA_MANDATE:** Đảm bảo metadata đầy đủ và chính xác cho tất cả các mục bộ nhớ
+- **SOT_NEW_INFO:** Nhận diện thông tin mới quan trọng như là một nguồn sự thật (SSoT) và lập tài liệu phù hợp
+- **TOOL_PRECISION:** Duy trì độ chính xác khi sử dụng các công cụ
+- **SEARCH_FIRST:** Luôn tìm kiếm trong bộ nhớ hiện có trước khi tạo/cập nhật thông tin, sử dụng lệnh `find` + `grep` để tuân thủ nguyên tắc DRY và SSoT, theo chi tiết trong `rule-get-memory.mdc`
+
+
+
+</rewritten_file> 

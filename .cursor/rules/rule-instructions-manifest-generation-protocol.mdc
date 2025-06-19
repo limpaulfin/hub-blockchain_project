@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Protocol: manifest.json Generation
+
+## Objective
+To create and maintain a `manifest.json` file within the `.cursor/rules/` directory. This file serves as an inventory of all `.mdc` rule files, providing their count, directory, and a concise summary for each.
+
+## Procedure
+
+1.  **List `.mdc` Files**:
+    *   Execute a terminal command to list all files with the `.mdc` extension located in the `./.cursor/rules/` directory.
+    *   Example command: `find ./.cursor/rules/ -maxdepth 1 -type f -name "*.mdc" -print`
+    *   Store the count of these files. This will be the value for `rules_count` in `manifest.json`.
+
+2.  **Initialize `manifest.json` (if it doesn't exist)**:
+    *   If `manifest.json` does not exist, create it with the basic structure:
+        ```json
+        {
+          "rules_count": 0,
+          "rules_directory": "./.cursor/rules/",
+          "rules_details": []
+        }
+        ```
+    *   Update `rules_count` with the actual count obtained in step 1.
+
+3.  **Iterative Processing of Each `.mdc` File**:
+    *   For each `.mdc` file found:
+        a.  **Read File Content**: Read the entire content of the current `.mdc` file.
+        b.  **Generate Summary**: Create a concise summary (1-3 sentences) that accurately reflects the core purpose and content of the rule. The summary *must* be derived from the actual content of the file, not just its metadata or filename.
+        c.  **Read `manifest.json`**: Read the current content of `./.cursor/rules/manifest.json`.
+        d.  **Update `manifest.json`**:
+            *   Locate the entry for the current `.mdc` file within the `rules_details` array.
+            *   If an entry exists, update its `summary` field with the newly generated summary.
+            *   If no entry exists (e.g., a new rule file was added), append a new object to the `rules_details` array:
+                ```json
+                {
+                  "filename": "your-rule-filename.mdc",
+                  "summary": "Your generated summary here."
+                }
+                ```
+            *   Ensure the `filename` is just the file name (e.g., `your-rule-filename.mdc`), not the full path.
+            *   Ensure JSON string content (especially summaries) is correctly escaped (e.g., double quotes within strings should be `\"`).
+            *   Write the updated content back to `./.cursor/rules/manifest.json`.
+
+4.  **Final Verification**:
+    *   The number of entries in the `rules_details` array must match the `rules_count`.
+    *   The `rules_directory` field should correctly point to `./.cursor/rules/`.
+    *   The overall `manifest.json` file should be well-formed JSON and ideally remain under a reasonable line limit (e.g., 200-250 lines) by keeping summaries concise.
+
+## Important Considerations:
+
+*   **Concise Summaries**: Summaries must be brief yet informative, capturing the essence of the rule. Avoid overly long summaries.
+*   **Accuracy**: Summaries must accurately represent the content of the corresponding `.mdc` file.
+*   **JSON Validity**: Ensure that `manifest.json` is always valid JSON. Pay close attention to commas, brackets, and string escaping.
+*   **Iterative Updates**: Update `manifest.json` after processing each file to prevent data loss and allow for interruption and resumption of the process.
+*   **Error Handling**: If errors occur during file reading or JSON parsing, address them before proceeding. If a linter error occurs when updating `manifest.json`, analyze the error and re-attempt the edit with corrections. Common issues include unescaped special characters in summaries.
+*   **SSoT (Single Source of Truth)**: The content of the `.mdc` files is the SSoT. Summaries are derived from them.
+
+This protocol ensures that `manifest.json` remains an up-to-date and accurate reflection of the rule set. 

@@ -1,0 +1,64 @@
+{
+  "title": "Túc Mạng Minh - Công cụ Tra cứu Lịch sử Tệp",
+  "description": "Một công cụ dòng lệnh (CLI) bằng Python để tìm kiếm và phân tích các phiên bản tệp được tạo bởi tiện ích mở rộng 'Local History' của VS Code.",
+  "created_at": ["2025-06-13--13:00:00+0700", 1749808800],
+  "updated_at": ["2025-06-13--13:45:00+0700", 1749811500],
+  "last_accessed": "2025-06-13--13:45:00+0700",
+  "access_count": 1,
+  "importance": 0.8,
+  "related_modules": [
+    "main.py",
+    "src/cli.py",
+    "src/validator.py",
+    "src/orchestrator.py",
+    "src/history_finder.py",
+    "src/content_searcher.py",
+    "src/printer.py",
+    "src/config.py",
+    "src/file_utils.py"
+  ],
+  "tags": [
+    "cli",
+    "python",
+    "search-tool",
+    "file-history",
+    "local-history",
+    "development-utility",
+    "automation",
+    "tuc-mang-minh",
+    "internal-tool"
+  ],
+  "version": "0.1.0",
+  "folder_context": {
+    "what_contains": "Mã nguồn Python cho công cụ CLI, tài liệu (README, rules), và thư mục chứa kết quả output.",
+    "why_purpose": "Cung cấp cho lập trình viên một cách để 'nhìn lại tiền kiếp' của một tệp tin, hiểu rõ quá trình tiến hóa của nó, tìm lại code đã mất, và phân tích các thay đổi, lấy cảm hứng từ khái niệm 'Túc Mạng Minh' trong Phật giáo.",
+    "who_owner": "Anh Fong & Asi",
+    "when_usage": "Sử dụng khi cần điều tra lịch sử của một tệp ngoài những gì Git theo dõi, hoặc cho các tệp không nằm trong Git. Được cập nhật khi có tính năng mới.",
+    "where_relation": "Là một công cụ độc lập nằm trong thư mục .cursor/rules, hoạt động trên thư mục .history của toàn bộ workspace. Nó bổ sung và kết hợp được với Git.",
+    "how_interaction": "Sử dụng qua dòng lệnh như mô tả trong README.md và tuc-mang-minh.mdc. Có thể kết hợp với `git diff` để phân tích chi tiết."
+  },
+  "main_script": "main.py",
+  "python_version": ">=3.6",
+  "dependencies": [],
+  "directory_tree": {
+    "tuc-mang-minh/": {
+      "main.py": "Main CLI entry point.",
+      "manifest.json": "This file.",
+      "README.md": "Usage instructions.",
+      "src/": {
+        "__init__.py": "Makes 'src' a Python package.",
+        "config.py": "Stores default configurations.",
+        "cli.py": "Handles command-line argument parsing.",
+        "validator.py": "Validates and converts arguments.",
+        "orchestrator.py": "Orchestrates the main search logic.",
+        "printer.py": "Handles printing results to the console.",
+        "history_finder.py": "Module for finding and filtering file versions.",
+        "content_searcher.py": "Module for searching text within files.",
+        "file_utils.py": "Module for file utility operations."
+      },
+      "docs/": {
+        "AI history look back.md": "Initial research and Bash script."
+      }
+    }
+  }
+}

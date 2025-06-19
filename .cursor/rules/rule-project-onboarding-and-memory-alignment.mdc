@@ -1,0 +1,99 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Quy trình Tiếp nhận Dự án và Đồng bộ Bộ nhớ
+*Mod by Asi on 2025-06-18*
+
+## 1. Mục đích
+
+Quy tắc này định nghĩa một quy trình chuẩn để AI (em) nhanh chóng xây dựng hiểu biết sâu sắc về cấu trúc của một dự án mới và đảm bảo rằng sự hiểu biết đó được lưu trữ, đồng bộ hóa với bộ nhớ dài hạn (`.memory/`).
+
+Quy trình này phải được thực thi khi:
+- Bắt đầu làm việc trên một project hoàn toàn mới.
+- Sau khi thực hiện một thay đổi lớn về cấu trúc (ví dụ: sau `git pull` hoặc `git checkout`).
+- Khi AI cảm thấy các lệnh liên quan đến đường dẫn file bắt đầu thất bại, cho thấy sự hiểu biết về cấu trúc đã lỗi thời.
+
+## 2. Bước 1: Khám phá Cấu trúc Dự án ("Progressive Deepening")
+
+Mục tiêu là xây dựng một "bản đồ tinh thần" (mental map) về dự án mà không bị quá tải thông tin.
+
+1.  **Cái nhìn Tổng quan (Level 1):** Sử dụng `ls -aF` để xem tất cả các file và thư mục ở cấp gốc, bao gồm cả các mục ẩn.
+    Note about this project, and then you update and align with the current situation.
+    ls -aF
+    ```
+2.  **Xác định các Thư mục Cốt lõi:** Từ kết quả trên, xác định các thư mục quan trọng. Ví dụ điển hình:
+    -   `.cursor/` (Quy tắc và cấu hình AI)
+    -   `.memory/` (Bộ nhớ dài hạn)
+    -   `src/` hoặc `lib/` (Mã nguồn chính)
+    -   `tests/` hoặc `spec/` (Mã kiểm thử)
+    -   `docs/` (Tài liệu)
+    -   `config/` (Các file cấu hình)
+
+3.  **Đào sâu có Chọn lọc (Level 2+):** Sử dụng `tree -L 2` trên từng thư mục cốt lõi đã xác định để khám phá cấu trúc bên trong của chúng. Kỹ thuật này giống như "trượt một cửa sổ" (window-sliding) qua từng khu vực quan trọng.
+    ```bash
+    tree -L 2 .cursor
+    tree -L 2 src
+    # Lặp lại cho các thư mục quan trọng khác...
+    ```
+4.  **Hoàn thiện Bản đồ:** Lặp lại bước 3 cho đến khi có một bức tranh rõ ràng về nơi các thành phần chính của dự án đang ở.
+
+## 3. Bước 2: Đối chiếu và Đồng bộ với Bộ nhớ
+
+Sau khi đã có bản đồ cấu trúc dự án, bước tiếp theo là đảm bảo nó được ghi lại và cập nhật trong bộ nhớ.
+
+1.  **Tìm kiếm Ghi chú Cấu trúc:** Tìm kiếm trong thư mục `.memory/` một file ghi chú chuyên dụng về cấu trúc dự án. Tên file quy ước là `project-structure-map.md`.
+    ```bash
+    find ./.memory/ -type f -name "project-structure-map.md"
+    ```
+2.  **Thực hiện So sánh và Cập nhật:**
+    -   **Trường hợp 1: File tồn tại.**
+        -   Đọc nội dung file (`cat ./.memory/project-structure-map.md`).
+        -   So sánh nội dung đó với cấu trúc thực tế đã khám phá ở Bước 1.
+        -   Nếu có sự khác biệt (file/thư mục mới, bị xóa hoặc đổi tên), **BẮT BUỘC** phải cập nhật lại file `project-structure-map.md` để phản ánh đúng thực tế.
+    -   **Trường hợp 2: File không tồn tại.**
+        -   Tạo mới file `.memory/project-structure-map.md`.
+        -   Nội dung của file nên bao gồm output của các lệnh `tree` đã chạy, cùng với các ghi chú ngắn gọn giải thích vai trò của từng thư mục cốt lõi.
+
+## 4. Mẫu cho file `project-structure-map.md`
+
+Khi tạo mới hoặc cập nhật, file này nên theo cấu trúc sau:
+
+```markdown
+# Bản đồ Cấu trúc Dự án
+*Cập nhật lần cuối: YYYY-MM-DD HH:MM*
+
+## Cấu trúc Tổng quan
+```
+# Output của lệnh tree -L 1 hoặc ls -aF ở đây
+.
+├── .cursor/
+├── .memory/
+├── src/
+└── ...
+```
+
+## Chi tiết các Thư mục Cốt lõi
+
+### 📁 .cursor/
+*Chứa các quy tắc (.mdc) và cấu hình cho AI.*
+```
+# Output của lệnh tree -L 2 .cursor ở đây
+.cursor/
+└── rules/
+    ├── rule-a.mdc
+    └── rule-b.mdc
+```
+
+### 📁 src/
+*Mã nguồn chính của ứng dụng.*
+```
+# Output của lệnh tree -L 2 src ở đây
+src/
+├── components/
+├── pages/
+└── utils/
+```
+
+*(... tiếp tục cho các thư mục quan trọng khác ...)*

@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "title": "Túc Mạng Minh - System Architecture Blueprint",
+    "description": "This document outlines the technical architecture, data flow, and component responsibilities for the 'Túc Mạng Minh' command-line tool.",
+    "tags": [
+      "architecture",
+      "data-flow",
+      "cli-tool",
+      "python",
+      "tuc-mang-minh",
+      "system-design",
+      "local-history",
+      "vscode",
+      "cursor-ide"
+    ],
+    "version": "1.0.0",
+    "last_updated": "2025-06-17",
+    "status": "Finalized for v1.0"
+  },
+  "high_level_overview": {
+    "objective": "To provide a CLI for searching through file versions created by the native VSCode/Cursor 'Local History' feature. It automatically detects the history storage location and parses its specific metadata format.",
+    "core_components": [
+      "main.py (Orchestrator)",
+      "cli.py (Argument Parser)",
+      "validator.py (Input Validator)",
+      "history_finder.py (History Locator)",
+      "content_searcher.py (Content Searcher)",
+      "printer.py (Output Formatter & File Writer)"
+    ]
+  },
+  "data_flow": [
+    {
+      "step": 1,
+      "actor": "User",
+      "action": "Executes `main.py` with CLI arguments (e.g., --filename, --search, --context).",
+      "output": "Command-line arguments."
+    },
+    {
+      "step": 2,
+      "actor": "main.py / cli.py",
+      "action": "Parses the command-line arguments using `argparse`.",
+      "output": "A structured arguments object."
+    },
+    {
+      "step": 3,
+      "actor": "main.py / validator.py",
+      "action": "Validates the parsed arguments. It now includes logic to intelligently find the correct Local History storage path by checking a prioritized list of common locations (e.g., ~/.config/Cursor/User/History).",
+      "output": "Validated arguments (including the correct history path) or an error message."
+    },
+    {
+      "step": 4,
+      "actor": "main.py / history_finder.py",
+      "action": "Scans the hashed subdirectories within the located history path. It reads `entries.json` in each to find a metadata match for the target file. If matched, it extracts the list of historical version entries (file IDs and timestamps).",
+      "output": "A sorted list of historical version objects (path and timestamp)."
+    },
+    {
+      "step": 5,
+      "actor": "main.py / content_searcher.py",
+      "action": "Iterates through the list of historical files (up to the specified limit). For each file, it searches for the specified text. If found, it captures the matching line and any surrounding context lines.",
+      "output": "A list of match objects, each containing the file path, timestamp, and the formatted context."
+    },
+    {
+      "step": 6,
+      "actor": "main.py / printer.py",
+      "action": "Formats the collected matches for display and saves the complete, unformatted output to a timestamped file in the `.cursor/rules/tuc-mang-minh/tmp/` directory. It then prints the formatted matches to the console.",
+      "output": "Console output and a saved file."
+    },
+    {
+      "step": 7,
+      "actor": "printer.py / config.py",
+      "action": "After saving the new output file, it checks the `tmp` directory and cleans up the oldest files if the total number exceeds the configured limit (`MAX_OUTPUT_FILES`).",
+      "output": "A cleaned-up `tmp` directory."
+    }
+  ],
+  "component_details": {
+    "main.py": "The main entry point. Orchestrates the flow by calling other modules in sequence.",
+    "cli.py": "Defines and parses all command-line arguments using Python's `argparse` library.",
+    "validator.py": "Contains functions to validate user input. CRITICAL: This module now contains the logic to auto-detect the history storage path. It checks a prioritized list of known native locations (`~/.config/Cursor/User/History`, `~/.config/Code/User/History`) BEFORE falling back to the user-provided path (e.g., `./.history`). This ensures compatibility with the native VSCode/Cursor feature out-of-the-box.",
+    "history_finder.py": "MAJOR UPGRADE: This module was rewritten to understand the native VSCode/Cursor history format. It no longer assumes a mirrored directory structure. Instead, it iterates through hashed subdirectories, parses `entries.json` files to find the correct file resource URI, and then extracts version information (file ID and timestamp) from the metadata. The key for the version filename was identified as 'id', not 'name'.",
+    "content_searcher.py": "Contains the core logic for reading files and searching for text patterns, including the 'sliding window' context retrieval. No major changes in v1.0.",
+    "printer.py": "Responsible for all output. Formats results for the console and writes the full results to a file. No major changes in v1.0.",
+    "src/config.py": "Stores application-level settings, such as `MAX_OUTPUT_FILES`. No changes in v1.0."
+  },
+  "technical_findings_v1_0": {
+    "title": "Investigation of Native Local History Storage",
+    "discovery_1": {
+      "finding": "VSCode and its forks (like Cursor) do NOT use a project-local `.history` folder for their native 'Timeline' feature.",
+      "evidence": "Testing showed that while a `.history` folder might exist (from other extensions), the versions shown in the UI did not match its contents."
+    },
+    "discovery_2": {
+      "finding": "The native history is stored in a centralized, global directory within the user's config folder.",
+      "location_linux": "`~/.config/Cursor/User/History/` or `~/.config/Code/User/History/`."
+    },
+    "discovery_3": {
+      "finding": "The storage mechanism uses hashed directory names for each file. The mapping is stored in a metadata file.",
+      "metadata_file": "Each hashed subdirectory (e.g., `-154979f`) contains an `entries.json` file.",
+      "structure": {
+        "resource": "A URI pointing to the absolute path of the original file (e.g., `file:///path/to/original/file.mdc`). This is the key for matching.",
+        "entries": "An array of objects, where each object represents a historical version.",
+        "version_object_keys": {
+          "id": "The filename of the historical version stored in the hashed directory (e.g., `Ibgk.mdc`).",
+          "timestamp": "A Unix millisecond timestamp of when the version was saved."
+        }
+      },
+      "lesson_learned": "The key for the version filename is `id`, not `name`. This was a critical finding during debugging."
+    }
+  }
+}

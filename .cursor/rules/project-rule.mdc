@@ -1,0 +1,131 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Rules - Tiểu Luận Blockchain
+
+*Mod by Fong on 2025-06-16--00-06-AM*
+
+## Context dự án
+- **Dự án**: Hub Blockchain - Tiểu Luận Cá Nhân
+- **Môn học**: Chuỗi khối trong Kinh doanh (BLB 515)
+- **Giảng viên**: TS. Nguyễn Hoài Đức
+- **Đề tài**: Blockchain trong quản lý chuỗi cung ứng
+- **Yêu cầu**: Tối thiểu 5 trang A4, deadline 10 ngày sau thi cuối kỳ
+
+## Quy tắc thuật ngữ quan trọng
+
+### 1. Thuật ngữ chính xác
+**BẮT BUỘC**: Sử dụng thuật ngữ chính xác trong bối cảnh học thuật:
+
+- ✅ **"bài tiểu luận cá nhân"** - ĐÚNG
+- ❌ **"nghiên cứu"** hoặc **"bài nghiên cứu"** - SAI
+
+### 2. Ngữ cảnh sử dụng
+- Khi đề cập đến bài viết này: "bài tiểu luận cá nhân"
+- Khi đề cập đến câu hỏi: "câu hỏi chính của tiểu luận"
+- Khi đề cập đến mục tiêu: "mục tiêu của tiểu luận"
+- Khi đề cập đến phạm vi: "phạm vi tiểu luận"
+
+### 3. Ngoại lệ được phép
+Có thể sử dụng "nghiên cứu" trong các trường hợp sau:
+- Trích dẫn nguồn: "Theo nghiên cứu của McKinsey..."
+- Đề cập đến nghiên cứu của người khác: "Các nghiên cứu trước đây cho thấy..."
+- Hoạt động nghiên cứu chung: "việc nghiên cứu và ứng dụng công nghệ..."
+
+### 4. Cách diễn đạt thay thế
+Thay vì "nghiên cứu này", sử dụng:
+- "bài tiểu luận này"
+- "phân tích này"
+- "bài viết này"
+- "tiểu luận cá nhân này"
+
+## QUY TẮC CITATIONS VÀ NGUỒN THAM KHẢO (Cập nhật 2025-06-16)
+
+### 1. Yêu cầu URL bắt buộc
+**BẮT BUỘC**: Tất cả citations PHẢI có URL có thể truy cập được:
+
+- ✅ **Citations có DOI**: https://doi.org/10.xxxx/xxxxx
+- ✅ **Citations có HAL ID**: https://hal.science/hal-xxxxxxx  
+- ✅ **Citations có URL trực tiếp**: https://journal.com/article/xxx
+- ❌ **Citations không có URL** - TỪ CHỐI HOÀN TOÀN
+
+### 2. Tiêu chuẩn xác minh nguồn
+**BẮT BUỘC**: Mọi nguồn tham khảo phải được xác minh qua command line:
+
+```bash
+# Kiểm tra trạng thái HTTP
+curl -Is [URL] --connect-timeout 10 | head -5
+
+# Xác minh nội dung
+w3m -dump [URL] | grep -i "keywords" | head -10
+```
+
+### 3. Quy trình từ chối nguồn không có URL
+Khi gặp nguồn không có URL:
+1. **TỪNG CHỐI NGAY LẬP TỨC** - không sử dụng
+2. **TÌM KIẾM THAY THẾ** - tìm nguồn tương tự có URL
+3. **XÁC MINH MỚI** - áp dụng quy trình verification đầy đủ
+4. **GHI NHẬN** - document việc từ chối và thay thế
+
+### 4. Format citations chuẩn
+**BẮT BUỘC**: Mọi citation phải theo format:
+
+```
+Author, A. (Year). Title. *Journal*, Volume(Issue), Pages. URL
+
+Ví dụ:
+Karaduman, Ö., & Gülhas, G. (2025). Blockchain-Enabled Supply Chain Management: A Review of Security, Traceability, and Data Integrity. *Applied Sciences*, 15(9), 5168. https://doi.org/10.3390/app15095168
+```
+
+### 5. Verification workflow
+**BẮT BUỘC**: Áp dụng cho mọi nguồn mới:
+1. **HTTP Status Check** - xác nhận URL hoạt động
+2. **Author Verification** - xác nhận tên tác giả
+3. **Title Matching** - xác nhận tiêu đề chính xác  
+4. **Content Relevance** - xác nhận nội dung liên quan
+5. **Journal Credibility** - xác nhận tạp chí uy tín
+
+### 6. Rejection criteria
+**TỪ CHỐI** nguồn nếu:
+- ❌ Không có URL truy cập được
+- ❌ URL không hoạt động (404, timeout)
+- ❌ Nội dung không liên quan đến chủ đề
+- ❌ Tác giả/tiêu đề không khớp
+- ❌ Nguồn không uy tín (blog cá nhân, wiki, etc.)
+
+## Quy tắc áp dụng
+
+### Khi viết nội dung mới:
+- Luôn sử dụng "bài tiểu luận cá nhân" thay vì "nghiên cứu"
+- **BẮT BUỘC**: Mọi citation phải có URL và được verify
+- Kiểm tra thuật ngữ trước khi hoàn thành
+
+### Khi chỉnh sửa nội dung cũ:
+- Tìm và thay thế tất cả "nghiên cứu" không phù hợp
+- **KIỂM TRA**: Tất cả citations cũ phải có URL
+- **LOẠI BỎ**: Citations không có URL, tìm thay thế
+- Đảm bảo ngữ cảnh vẫn hợp lý sau khi thay đổi
+
+### Khi review:
+- Quét toàn bộ file để tìm thuật ngữ sai
+- **XÁC MINH**: Tất cả URLs trong citations hoạt động
+- Ưu tiên sửa các file chính (outline, part-*.md)
+
+## Lý do quy tắc
+- **Thuật ngữ**: Đảm bảo tính chính xác học thuật, phù hợp yêu cầu môn học
+- **Citations URL**: Đảm bảo tính xác minh được, tránh nguồn giả mạo
+- **Verification**: Đảm bảo chất lượng học thuật cao, tính tin cậy 100%
+- **Rejection policy**: Duy trì tiêu chuẩn nghiêm ngặt, chỉ chấp nhận nguồn uy tín
+
+## Files cần áp dụng
+- `thesis-outline/*main-outline.md`
+- Các file `part-*.md` khác khi tạo
+- `README.md` và các file documentation
+- **TẤT CẢ** files chứa citations và references
+
+## Ghi chú
+- Quy tắc thuật ngữ: Tạo ra sau khi phát hiện sử dụng sai "nghiên cứu" thay vì "tiểu luận"
+- **Quy tắc Citations URL**: Tạo ra sau khi xác minh thành công 100% nguồn Part 2 (2025-06-16)
+- **Zero tolerance**: Không chấp nhận bất kỳ nguồn nào không có URL xác minh được

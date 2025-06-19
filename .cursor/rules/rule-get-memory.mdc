@@ -1,0 +1,287 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Hướng Dẫn Tìm Kiếm Technical Note (Ghi Chú Kỹ Thuật) Trong Fong LMS
+
+*Version: 1.3.0 - Last updated: 2025-05-23*
+
+## Phương Pháp Tìm Kiếm Memory: Command Line (grep)
+
+Để truy vấn thông tin trong hệ thống memory (`.memory/`), **phương pháp chính được ưu tiên là sử dụng lệnh `grep` tiêu chuẩn trong terminal, với khả năng tìm kiếm đệ quy và tô màu kết quả**. Phương pháp này đảm bảo tìm kiếm hiệu quả, linh hoạt và toàn diện trong các file memory.
+
+**Cách sử dụng `grep`:**
+- Sử dụng cờ `-r` để tìm kiếm đệ quy, `-i` để không phân biệt hoa thường, và `--color=auto` để tô màu kết quả.
+- Dùng `--include` để chỉ tìm trong các loại file nhất định (ví dụ: `*.json`, `*.md`) và `--exclude-dir` để loại trừ các thư mục không mong muốn (ví dụ: `.history`).
+- Ví dụ: `grep --color=auto -r -i -H -E 'từ_khóa1|từ_khóa2' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/`
+- Nếu từ khóa ban đầu không mang lại kết quả mong muốn, hãy chủ động **brainstorm và mở rộng bộ từ khóa** một cách sáng tạo:
+  - **Song ngữ (Anh-Việt):** Liệt kê các thuật ngữ tương đương. Ví dụ: "file upload" -> "tải file", "tệp tin".
+  - **Từ đồng nghĩa/gần nghĩa:** Tìm các từ có ý nghĩa tương tự. Ví dụ: "error" -> "issue", "bug", "problem", "lỗi", "sự cố".
+  - **Từ khóa liên quan/phụ thuộc:** Liệt kê các khái niệm hoặc thành phần liên quan. Ví dụ: "React" -> "hook", "component", "state", "props".
+  **Đừng ngần ngại thực hiện tìm kiếm nhiều lần** với các bộ từ khóa khác nhau (kết hợp bằng `|`) để bao quát mọi khía cạnh của vấn đề.
+
+**TUYỆT ĐỐI KHÔNG** sử dụng các công cụ tìm kiếm tích hợp khác của editor (ví dụ: công cụ `grep_search` dựa trên ripgrep) cho thư mục `.memory/` vì kinh nghiệm cho thấy chúng có thể bỏ sót kết quả.
+
+> **Lý do:** `grep` qua terminal cung cấp sự linh hoạt và khả năng tùy chỉnh cao cho các truy vấn tìm kiếm, đảm bảo không bỏ sót thông tin, nhất là trong các file JSON phức tạp.
+
+### Lưu ý quan trọng
+- **Về grep và dữ liệu JSON (khi dùng terminal):** Khi tìm kiếm trong các file JSON bằng terminal, các pattern grep "cứng nhắc" rất dễ bỏ sót thông tin. Nên áp dụng chiến lược 2 bước: (1) grep rộng với từ khóa chung để lọc ra các file ứng viên, (2) đọc và phân tích toàn bộ nội dung file để hiểu ngữ cảnh.
+- **Nguyên tắc tìm kiếm GREP hiệu quả (khi dùng terminal):** Ưu tiên sử dụng các từ khóa đơn lẻ, ngắn gọn. Kết hợp nhiều từ khóa bằng toán tử `|` (OR) với `grep -E`. Luôn sử dụng cờ `-i` (không phân biệt hoa thường) và `-H` (hiển thị tên file).
+
+### Ví dụ lệnh terminal
+
+**Tìm kiếm đệ quy, không phân biệt hoa/thường, nhiều từ khóa đơn:**
+```bash
+grep --color=auto -r -i -H -E 'keyword1|term2|phrase3' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+**Tìm kiếm theo tag cụ thể hoặc các tag liên quan trong mảng JSON:**
+```bash
+grep --color=auto -r -i -H -E '"tags":.*("tag_a"|"tag_b")' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+**Tìm kiếm thông tin về 'user profile':**
+```bash
+grep --color=auto -r -i -H -E 'user|profile' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+**Tìm kiếm các ghi chú liên quan đến 'api key':**
+```bash
+grep --color=auto -r -i -H -E 'api|key|token|secret' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+## BẮT BUỘC: Chủ Động Tham Khảo Bài Học Kinh Nghiệm (Lesson Learned)
+
+Khi gặp khó khăn, trở ngại, không chắc chắn về cách xử lý vấn đề (đặc biệt là lỗi quy trình, cách dùng tool, hoặc các vấn đề đã gặp trước đó), hoặc trước khi yêu cầu sự trợ giúp từ người dùng, **BẮT BUỘC** phải:
+
+1. Chủ động tìm kiếm trong thư mục `.memory/long-term/` các file có tên theo mẫu `lesson*.json` (hoặc các pattern tương tự như `instruction-*.json`, `rule-*.json` nếu ngữ cảnh gợi ý) bằng lệnh `grep`.
+2. Sử dụng từ khóa liên quan đến vấn đề đang gặp phải để lọc kết quả tìm kiếm.
+3. Đọc và phân tích các bài học liên quan đã được ghi nhận trong các file tìm được.
+4. Xem xét liệu các giải pháp hoặc kinh nghiệm trong đó có thể áp dụng cho tình huống hiện tại hay không.
+5. Chỉ yêu cầu trợ giúp hoặc đề xuất giải pháp mới sau khi đã thực hiện bước tham khảo này và xác định rằng không có bài học nào phù hợp hoặc bài học không đủ để giải quyết vấn đề.
+
+> **Lý do:** Tận dụng kiến thức đã tích lũy, tăng khả năng tự giải quyết vấn đề, giảm việc hỏi lại các vấn đề đã có kinh nghiệm xử lý, thúc đẩy cải tiến liên tục. *(Độ ưu tiên: CAO)*
+
+## Tổng quan
+
+### Mục đích
+Tài liệu này hướng dẫn quy trình tìm kiếm, ghi nhận và sử dụng technical note (ghi chú kỹ thuật) trong dự án Fong LMS với hệ thống bộ nhớ AI hiện đại.
+
+### Lưu ý quan trọng
+Tài liệu này thay thế hoàn toàn hướng dẫn cũ về DKM. Mọi tài liệu kiến thức, technical note, best practice nên được lưu trong `.memory/` dưới dạng JSON (cho dữ liệu có cấu trúc) hoặc Markdown (.md) (cho ghi chú chứa code, văn bản dài). AI có quyền chọn định dạng phù hợp nhất cho việc đọc hiểu và sử dụng lại. Chỉ các diagram vẽ bằng ASCII mới được lưu trong file .md tại thư mục con meta/ascii/.
+
+### YÊU CẦU QUAN TRỌNG: Format Machine-Readable
+Tất cả các file JSON và Markdown (.md) **PHẢI** được lưu dưới dạng machine-readable, KHÔNG phải human-readable. Điều này có nghĩa là:
+- File JSON: KHÔNG sử dụng pretty-print, indent, hoặc định dạng để con người dễ đọc
+- File JSON phải là compact, single-line khi có thể
+- Đối với cả file JSON và MD, ưu tiên format tối ưu cho máy đọc và xử lý
+- Metadata PHẢI tuân thủ cấu trúc nhất quán, không dư thừa
+
+> **Lý do:** Định dạng machine-readable tối ưu hóa quá trình xử lý, phân tích, và lưu trữ dữ liệu cho các hệ thống tự động và API. *(Độ ưu tiên: CAO NHẤT)*
+
+### Yêu Cầu Bắt Buộc: Truy Xuất Thông Tin (IR) Từ Bộ Nhớ
+**VỚI MỖI PROMPT**, việc truy xuất thông tin (Information Retrieval - IR) từ bộ nhớ là **BẮT BUỘC** và **CỰC KỲ QUAN TRỌNG**. Luôn ưu tiên tìm kiếm trong bộ nhớ ngắn hạn (`short-term/`) trước, sau đó mới đến bộ nhớ dài hạn (`long-term/`), sử dụng lệnh `grep` làm phương thức chính. Quy trình này đảm bảo ngữ cảnh luôn được cập nhật và các quyết định/hành động dựa trên thông tin mới nhất. *(Độ ưu tiên: CAO NHẤT)*
+
+### Tính năng mới
+- Hỗ trợ lưu trữ và truy xuất theo nguyên tắc 80/20 (Pareto)
+- Phân loại tài liệu theo mức độ importance (0.0-1.0)
+- Hỗ trợ sơ đồ ASCII cho trực quan hóa cấu trúc
+- Tìm kiếm theo metadata và tags
+- Khuyến khích sử dụng nhiều từ khóa và tìm kiếm lặp lại với command line để có kết quả tốt nhất
+
+## Cấu trúc Memory
+
+### Tổng quan
+- Toàn bộ technical note, best practice, mapping... được lưu dưới dạng file JSON hoặc Markdown (.md) trong thư mục `.memory/` của dự án, tùy theo nội dung và sự phù hợp cho AI đọc hiểu/sử dụng.
+- Không còn sử dụng thư mục DKM. File Markdown (.md) được khuyến khích cho technical note chứa nhiều code hoặc văn bản dài.
+- Sơ đồ ASCII diagram được lưu trong thư mục `.memory/meta/ascii/` dưới dạng file .md (chi tiết bên dưới).
+
+### Cấu trúc thư mục
+#### `.memory/short-term/`
+- **Mục đích**: Bộ nhớ ngắn hạn (context thao tác, debug, todo, quick-note, test, session...)
+- **Lưu ý**: Thông tin trong bộ nhớ ngắn hạn cần được chuyển sang bộ nhớ dài hạn khi không còn phù hợp. Xem ví dụ file trong `howto-dkm-set-memory.mdc`.
+
+#### `.memory/long-term/`
+- **Mục đích**: Bộ nhớ dài hạn (technical note, best practice, mapping, cấu trúc, logic, tài liệu lâu dài)
+- **Lưu ý**: Chứa file theo mẫu `very-important-*.json` lưu các thông tin quan trọng nhất (importance >= 0.75). Xem ví dụ file trong `howto-dkm-set-memory.mdc`.
+
+#### `.memory/meta/`
+- **Mục đích**: Policy, cấu hình, prompt mẫu, và diagram ASCII.
+- **Lưu ý**:
+  - Các sơ đồ kiến trúc (architecture diagram) vẽ bằng ASCII PHẢI lưu ở file `.md` trong thư mục con `meta/ascii/`.
+  - Các diagram khác (draw.io) lưu theo định dạng gốc trong thư mục này.
+  - KHÔNG được lưu technical note, best practice, mapping trong file .md.
+
+### Quản lý
+- Quản lý bởi file `manifest.json` (chỉ mục, policy, index các file). Luôn kiểm tra file này để có cái nhìn tổng quan.
+- Cập nhật các diagram cấu trúc (`memory-structure-diagram.*`, `memory-workflow-diagram.*`) khi thay đổi cấu trúc.
+
+## Quy trình tìm kiếm
+
+### Bước 0: Ưu Tiên Tìm Kiếm Short-Term
+Luôn bắt đầu tìm kiếm trong thư mục `.memory/short-term/` trước khi tìm trong long-term, sử dụng lệnh `grep` để tìm theo từ khóa phù hợp.
+
+```bash
+grep --color=auto -r -i -H -E 'từ_khóa_ngắn_hạn' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+> **Lưu ý**: Nếu tìm thấy thông tin phù hợp và đủ dùng trong short-term, có thể dừng tìm kiếm tại đây.
+
+### Bước 1: Tìm Kiếm Memory Tổng Quát
+Tìm kiếm trong toàn bộ thư mục `.memory/` với các từ khóa chính liên quan đến vấn đề.
+
+Phân tích vấn đề, xác định các từ khóa kỹ thuật đơn lẻ, ngắn gọn (tiếng Anh, không dấu, hoặc tiếng Việt nếu là thuật ngữ đã thống nhất).
+
+**Hãy chủ động thử nhiều bộ từ khóa và lặp lại tìm kiếm nếu cần thiết.** Ví dụ, nếu tìm 'user authentication' không ra, thử 'login', 'user access', 'security credential', 'auth method', v.v. Đừng ngần ngại thử nhiều lần với các biến thể từ khóa khác nhau.
+
+> **Độ ưu tiên**: Phương pháp tìm kiếm chính.
+
+**Ví dụ:**
+
+Tìm kiếm thông tin về 'nonce security':
+```bash
+grep --color=auto -r -i -H -E 'nonce|security' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+Tìm kiếm theo tag 'ajax request':
+```bash
+grep --color=auto -r -i -H -E '"tags":.*"ajax request"' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+Tìm các ghi chú quan trọng về 'user location':
+```bash
+grep --color=auto -r -i -H -E '"importance":[0-9]\.[7-9][0-9]*.*"user.*location|user.*location.*"importance":[0-9]\.[7-9][0-9]*' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+### Bước 2: Tìm Kiếm Nâng Cao Với Regex
+Sử dụng các biểu thức regex phức tạp hơn khi cần tìm kiếm có điều kiện hoặc mẫu cụ thể.
+Thực hiện tìm kiếm "loose" (không phân biệt hoa thường, dùng OR `|` với `grep -E`) hoặc "strict" (cụm từ chính xác, regex phức tạp).
+
+**Ví dụ:**
+
+Tìm loose cho 'nonce', 'security', hoặc 'token':
+```bash
+grep --color=auto -r -i -H -E 'nonce|security|token' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+Tìm kiếm với regex phức tạp hơn:
+```bash
+grep --color=auto -r -i -H -E '"function":[[:space:]]*"[^"]*login[^"]*"' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+### Bước 3: Kiểm Tra very-important-*.json
+Luôn kiểm tra các file `very-important-*.json` vì chúng chứa thông tin quan trọng nhất.
+
+```bash
+grep --color=auto -r -i -H -E 'keyword1|term2' --include='very-important-*.json' --exclude-dir='.history' ./.memory/long-term/
+```
+
+### Bước 4: Tìm Kiếm Theo Metadata và Tags
+Tìm kiếm theo metadata cụ thể, nhất là các tags.
+
+```bash
+grep --color=auto -r -i -H -E '"tags":.*("tag_value1"|"tag_value2")' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+```bash
+grep --color=auto -r -i -H -E '"importance":[0-9]\.8[0-9]*.*"critical"|"critical.*"importance":[0-9]\.8[0-9]*' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+### Bước 5: Tìm Kiếm Trong Sơ Đồ ASCII
+Kiểm tra các sơ đồ ASCII (`meta/ascii/*.md`).
+
+```bash
+grep --color=auto -r -i -H "tu_khoa" --include='*.md' --exclude-dir='.history' ./.memory/meta/ascii/
+```
+
+### Bước 6: Đọc Kết Quả
+1. Phân tích kết quả output terminal.
+2. Mở file JSON/MD tìm được, đọc nội dung. Chú ý các trường: `title`, `description`, `mapping`, `best_practices`, `related_files`, `importance`, `tags`.
+3. Tham khảo file `manifest.json` để biết index, policy, cấu trúc bộ nhớ.
+
+### Bước 7: Caching Thông Tin Hữu Ích (Nếu Tìm Từ Long-Term)
+Nếu thông tin tìm được từ `.memory/long-term/` được đánh giá là quan trọng và có khả năng cao được sử dụng lại trong phiên làm việc hiện tại:
+
+1. Tạo một bản sao tạm thời (hoặc chỉ phần liên quan) của thông tin đó vào một file JSON trong `.memory/short-term/`.
+2. Gắn thêm metadata chuẩn cho bản ghi tạm thời này, BAO GỒM: `"is_temporary":true`, `"source_file":"path/to/long-term/file.json"`, và `"cached_at":[human,timestamp]`.
+3. Việc này giúp tăng tốc độ truy cập cho các lần tìm kiếm sau trong cùng session.
+
+> **Lưu ý**: Quy tắc dọn dẹp cache được định nghĩa trong `howto-dkm-set-memory.mdc`.
+
+## Quy tắc tạo ghi chú mới
+
+- Tuyệt đối không tạo file .md trong DKM
+- Ghi nhận technical note mới bằng cách tạo file JSON (cho dữ liệu có cấu trúc) hoặc Markdown (.md) (cho code/văn bản) trong `.memory/long-term/` hoặc `.memory/short-term/`. Lựa chọn định dạng phù hợp với loại dữ liệu.
+- Đặt tên file rõ ràng, mô tả chức năng, tuân thủ quy tắc đặt tên (`kebab-case-name-[timestamp].json` hoặc `.md`).
+- Tuân thủ cấu trúc JSON machine-readable (không indent, không dư thừa) với đầy đủ metadata bắt buộc (tham khảo `howto-dkm-set-memory.mdc`) nếu là file JSON. File Markdown nên có phần metadata YAML front matter nếu cần thiết cho AI xử lý.
+- Cập nhật trường `index` trong `manifest.json` nếu tạo file mới.
+- Không cần backup file trong `.memory/` (auto-overwrite, no_backup_needed)
+- Đánh giá và gán chính xác giá trị importance (0.0-1.0).
+
+## Best Practices
+
+### BẮT BUỘC: Chỉ Định Chính Xác Đường Dẫn Thư Mục .memory
+
+TUYỆT ĐỐI LƯU Ý: Đường dẫn chính xác và duy nhất cho thư mục bộ nhớ của dự án là `.memory/` (đường dẫn tương đối từ thư mục gốc của workspace).
+
+Mọi thao tác tìm kiếm, đọc, ghi vào bộ nhớ PHẢI sử dụng đường dẫn này.
+
+TRÁNH TUYỆT ĐỐI việc nhầm lẫn hoặc tạo thư mục `.memory/` ở thư mục khác.
+
+Tất cả các ví dụ lệnh `grep` trong tài liệu này đều đã sử dụng đường dẫn đúng. Cần kiểm tra kỹ mỗi khi thao tác để tránh lặp lại lỗi cũ.
+
+> **Lý do**: Đảm bảo tính nhất quán, tránh phân mảnh dữ liệu và lỗi không tìm thấy thông tin do sai vị trí. *(Độ ưu tiên: CAO NHẤT)*
+
+### Các quy tắc quan trọng khác
+
+- Luôn ưu tiên sử dụng `grep` để tìm kiếm trong `.memory/`. **Chủ động sử dụng nhiều từ khóa, thử các cách kết hợp khác nhau và tìm kiếm nhiều lần nếu cần thiết để đạt được kết quả tốt nhất.**
+- Luôn đảm bảo file JSON và MD là machine-readable, không phải human-readable.
+- Luôn kiểm tra dung lượng file trước khi ghi (giới hạn ~50.000 ký tự/file).
+- Nếu file quá lớn, chia nhỏ và cập nhật lại `manifest.json`.
+- Không lưu thông tin cá nhân, chỉ technical note, best practice, mapping kỹ thuật.
+- Tham khảo `manifest.json` và các quy tắc trong `.cursor/rules/*.mdc` để đảm bảo đúng quy trình.
+- Chỉ sử dụng file .md cho diagram ASCII (`meta/ascii/`).
+- Tuân thủ nguyên tắc 80/20: Xác định thông tin quan trọng nhất để lưu vào `very-important-*.json`.
+- Kiểm tra tần suất truy cập, mức độ ảnh hưởng, phạm vi áp dụng và tính thời sự khi đánh giá importance.
+
+## Ví dụ tìm kiếm
+
+### Tìm thông tin quan trọng về user location
+```bash
+grep --color=auto -r -i -H -E '"importance":[0-9]\.[7-9][0-9]*.*user.*location|user.*location.*"importance":[0-9]\.[7-9][0-9]*' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+### Tìm best practice về hooks trong very-important
+```bash
+grep --color=auto -r -i -H -E 'best.?practice.*hook|hook.*best.?practice' --include='very-important-*.json' --exclude-dir='.history' ./.memory/long-term/
+```
+
+### Tìm technical note về quiz timer
+```bash
+grep --color=auto -r -i -H -E 'technical.?note.*quiz.*timer|quiz.*timer.*technical.?note' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+### Tìm kiếm chi tiết và lặp lại về cài đặt thông báo người dùng
+Sử dụng nhiều từ khóa, thử các cụm từ khác nhau và tìm kiếm nhiều lần. Ví dụ, nếu tìm "user notification" không hiệu quả, hãy thử các từ khóa cụ thể hơn như "user notification settings", "user alert configuration", "email notification setup", hoặc kết hợp như "user notification email settings". Lặp lại với các biến thể nếu cần.
+
+```bash
+grep --color=auto -r -i -H -E 'user.*notification.*settings|notification.*user.*settings|user.*settings.*notification' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+```bash
+grep --color=auto -r -i -H -E 'user.*alert|notification.*email|email.*settings' --include='*.json' --include='*.md' --exclude-dir='.history' ./.memory/
+```
+
+> **Lưu ý**: Đây là ví dụ về việc sử dụng nhiều từ khóa và cần lặp lại với các biến thể khác nhau để đạt kết quả tối ưu.
+
+### Truy xuất danh sách recent working files trong session context
+Để xem nội dung file active-context-*.json, có thể dùng lệnh cat (Terminal):
+```bash
+cat .memory/short-term/active-context-*.json
+```
+
+Hoặc tìm kiếm từ khóa trong file đó:
+```bash
+grep --color=auto -r -i -H "recent_working_files" --include='active-context-*.json' --exclude-dir='.history' ./.memory/short-term/
+```

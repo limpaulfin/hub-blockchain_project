@@ -1,0 +1,66 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Rule: Git Sync & Push Workflow (Simplified for this Project)
+
+*Mod by Asi on 2025-06-19--12-20-PM*
+
+## Description
+Quy tắc này định nghĩa quy trình đồng bộ (sync) và đẩy (push) code đã được đơn giản hóa cho dự án này. Quy trình mặc định là làm việc trực tiếp trên nhánh `main`.
+
+## Glob Patterns
+- `**/*` (Áp dụng cho tất cả các file trong workspace)
+
+## Always Apply
+true
+
+## Rules
+
+### 1. Primary Branch
+- Nhánh làm việc và triển khai chính là: `main`.
+- Mọi commit sẽ được thực hiện trực tiếp trên nhánh `main`.
+
+### 2. Staging Changes
+- Sử dụng `git add .` để thêm tất cả các thay đổi vào staging area.
+- Giải thích ngắn gọn những gì đang được staged trước khi commit.
+
+### 3. Commit Message Format
+- **Định dạng**: `YYYY-MM-DD: {commit message}`
+- **Giới hạn**: 30-40 từ
+- **Nội dung**: Mô tả ngắn gọn các thay đổi chính bằng **tiếng Việt không dấu**.
+
+### 4. Push Process
+- **Push trực tiếp**: Các thay đổi sẽ được đẩy trực tiếp lên `origin main`.
+  ```bash
+  git push origin main
+  ```
+- **Không sử dụng nhánh `dev`**: Quy trình nhánh `dev` phức tạp không được áp dụng cho dự án này để đảm bảo sự đơn giản.
+
+### 5. Post-Push Actions
+- Lấy commit hash mới nhất: `git rev-parse HEAD`
+- Cập nhật hash vào `.memory/git_commit_log.json`.
+- Duy trì khoảng 10 hash gần nhất trong file log.
+
+## Example
+```bash
+# Staging
+git add .
+
+# Commit
+git commit -m "2025-06-19: Cap nhat logic xu ly transaction"
+
+# Push len nhanh main
+git push origin main
+
+# Log commit hash
+git rev-parse HEAD >> .memory/short-term/git_commit_log.json
+```
+
+## Related Files
+- `.memory/short-term/git_commit_log.json`
+
+## Notes
+- Quy tắc này đã được đơn giản hóa theo yêu cầu để phù hợp với workflow của dự án.
+- Luôn ưu tiên yêu cầu cụ thể từ user nếu có.

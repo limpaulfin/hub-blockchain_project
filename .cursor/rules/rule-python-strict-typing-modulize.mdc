@@ -1,0 +1,257 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+*Mod by Fong on 2025-06-19--11-58-AM*
+
+# Rule: Python Strict Typing & Modulize Protocol
+
+## Mục đích
+Đảm bảo code Python có type safety cao, cấu trúc module rõ ràng và mỗi file dưới 170 dòng.
+
+## Nguyên tắc cốt lõi
+
+### 1. Strict Type Checking (Bắt buộc)
+- **Type hints**: Tất cả function/method PHẢI có type annotation
+- **Variable annotation**: Khai báo type cho biến phức tạp  
+- **Return type**: Luôn khai báo kiểu trả về
+- **MyPy compliance**: Code phải pass mypy strict mode
+
+### 2. Modulize Strategy
+- **Single Responsibility**: Mỗi module chỉ một nhiệm vụ chính
+- **Clear Interface**: Import/export rõ ràng
+- **Dependency Injection**: Tránh hard-coded dependencies
+- **Package Structure**: Organized theo domain logic
+
+### 3. LOC Constraint
+- **Mỗi file Python ≤ 170 LOC**
+- **Function ≤ 25 LOC**
+- **Class ≤ 100 LOC** 
+- **Auto-refactor** khi vượt ngưỡng
+
+## Implementation Rules
+
+### Type Annotations
+```python
+# ✅ ĐÚNG - Full type annotation
+from typing import Optional, Dict, List, Union
+from dataclasses import dataclass
+
+def process_data(
+    items: List[Dict[str, Union[str, int]]], 
+    config: Optional[Dict[str, str]] = None
+) -> Dict[str, int]:
+    """Process data with strict typing."""
+    result: Dict[str, int] = {}
+    # ... implementation
+    return result
+
+@dataclass
+class UserProfile:
+    user_id: int
+    name: str
+    email: Optional[str] = None
+```
+
+```python
+# ❌ SAI - Không có type hints
+def process_data(items, config=None):
+    result = {}
+    return result
+```
+
+### Module Structure Template
+```text
+project/
+├── src/
+│   ├── __init__.py
+│   ├── models/          # Data models (<170 LOC each)
+│   │   ├── __init__.py
+│   │   ├── user.py
+│   │   └── transaction.py
+│   ├── services/        # Business logic (<170 LOC each)
+│   │   ├── __init__.py
+│   │   ├── user_service.py
+│   │   └── auth_service.py
+│   ├── utils/          # Utilities (<170 LOC each)
+│   │   ├── __init__.py
+│   │   ├── validators.py
+│   │   └── helpers.py
+│   └── main.py         # Entry point (<170 LOC)
+├── tests/
+├── mypy.ini
+└── requirements.txt
+```
+
+## Bắt buộc Config Files
+
+### mypy.ini
+```ini
+[mypy]
+python_version = 3.9
+warn_return_any = True
+warn_unused_configs = True
+disallow_untyped_defs = True
+disallow_incomplete_defs = True
+check_untyped_defs = True
+disallow_untyped_decorators = True
+no_implicit_optional = True
+warn_redundant_casts = True
+warn_unused_ignores = True
+warn_no_return = True
+warn_unreachable = True
+strict_equality = True
+```
+
+### requirements.txt (Type tools)
+```txt
+mypy>=1.0.0
+typing-extensions>=4.0.0
+pydantic>=2.0.0
+```
+
+## Refactoring Protocol
+
+### Khi file > 170 LOC:
+1. **Analyze**: Tìm logical boundaries
+2. **Extract**: Tách thành modules nhỏ
+3. **Interface**: Define clear interfaces
+4. **Test**: Verify functionality 
+5. **Validate**: Check mypy compliance
+
+### Module Splitting Strategy:
+```python
+# TRƯỚC: large_file.py (200+ LOC)
+class UserManager:
+    def authenticate(self): ...
+    def validate_email(self): ...
+    def send_notification(self): ...
+    def generate_report(self): ...
+
+# SAU: Tách thành 3 modules
+# auth.py (<170 LOC)
+class AuthService:
+    def authenticate(self): ...
+
+# validators.py (<170 LOC)  
+class EmailValidator:
+    def validate_email(self): ...
+
+# notifications.py (<170 LOC)
+class NotificationService:
+    def send_notification(self): ...
+```
+
+## Quality Checks
+
+### Pre-commit Hooks
+```bash
+# Type check
+mypy src/
+
+# LOC check
+find src/ -name "*.py" -exec wc -l {} + | awk '$1 > 170 {print "❌ " $2 " has " $1 " LOC"}'
+
+# Import sorting
+isort src/
+
+# Code formatting
+black src/
+```
+
+### CI/CD Pipeline
+```yaml
+steps:
+  - name: Type Check
+    run: mypy src/
+  
+  - name: LOC Validation
+    run: |
+      for file in $(find src/ -name "*.py"); do
+        loc=$(wc -l < "$file")
+        if [ $loc -gt 170 ]; then
+          echo "❌ $file: $loc LOC (>170)"
+          exit 1
+        fi
+      done
+```
+
+## Best Practices
+
+### 1. Type-First Development
+- Định nghĩa interfaces trước
+- Sử dụng Protocol cho duck typing
+- Leverage Generic types
+
+### 2. Module Dependencies
+```python
+# ✅ ĐÚNG - Dependency injection
+class UserService:
+    def __init__(self, db: Database, logger: Logger):
+        self.db = db
+        self.logger = logger
+
+# ❌ SAI - Hard-coded import
+class UserService:
+    def __init__(self):
+        from database import db
+        self.db = db
+```
+
+### 3. Error Handling
+```python
+from typing import Result, Optional
+
+def safe_divide(a: float, b: float) -> Optional[float]:
+    """Type-safe division with error handling."""
+    if b == 0:
+        return None
+    return a / b
+```
+
+## Validation Commands
+
+```bash
+# LOC check
+wc -l src/**/*.py | awk '$1 > 170 {print "❌", $2, $1, "LOC"}'
+
+# Type check
+mypy src/ --strict
+
+# Module dependency check
+pydeps src/ --show-deps
+
+# Import validation
+python -c "import src; print('✅ Import successful')"
+```
+
+## Exception Handling
+
+### Các trường hợp ngoại lệ (>170 LOC):
+- **Generated code**: Auto-generated files
+- **Legacy code**: Migration files có comment rõ ràng
+- **Test files**: Integration tests phức tạp
+- **Config files**: Settings với extensive documentation
+
+**Mọi ngoại lệ PHẢI có approval từ team lead và comment giải thích.**
+
+## Tools Integration
+
+### VS Code Settings
+```json
+{
+  "python.linting.mypyEnabled": true,
+  "python.linting.enabled": true,
+  "python.defaultInterpreterPath": "./venv/bin/python"
+}
+```
+
+### PyCharm Configuration
+- Enable type checking warnings
+- Set code style to enforce line limits
+- Configure mypy plugin
+
+---
+
+**Ghi nhớ**: Tập trung vào type safety và modularity. Mỗi module phải có single responsibility và clear interface. LOC limit giúp maintain code quality.

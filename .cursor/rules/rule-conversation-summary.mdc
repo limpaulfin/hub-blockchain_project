@@ -1,0 +1,168 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Asi on 2025-06-14--01-44-AM*
+
+# Quy tắc Tóm tắt Cuộc hội thoại (Conversation Summary Rule)
+
+## Mục đích
+Đảm bảo mỗi cuộc hội thoại được tóm tắt và lưu trữ một cách có hệ thống, giúp duy trì tính liên tục của kiến thức và bài học kinh nghiệm qua các phiên làm việc.
+
+## Nguyên tắc cốt lõi
+- **Nguyên tắc Pareto (80/20)**: Tập trung vào 20% thông tin quan trọng nhất mang lại 80% giá trị.
+- **Machine-readability**: Định dạng phải dễ đọc cho cả người và máy.
+- **DRY (Don't Repeat Yourself)**: Không tạo thông tin trùng lặp, tham chiếu hoặc củng cố thông tin hiện có.
+- **Tính liên tục**: Đảm bảo tính liên tục của kiến thức qua các phiên làm việc.
+
+## Quy trình tạo tóm tắt
+
+### 1. Thời điểm tạo tóm tắt
+- **Sau mỗi phản hồi** quan trọng hoặc khi kết thúc một chủ đề/phiên làm việc.
+- **Trước khi chuyển sang chủ đề mới** hoặc khi có yêu cầu tóm tắt rõ ràng.
+
+### 2. Kiểm tra tóm tắt hiện có
+- **Tìm kiếm các tóm tắt hiện có** liên quan đến chủ đề:
+  ```bash
+  grep --color=auto -r -i -H -E 'từ_khóa_1|từ_khóa_2' --include='response-summary-*.md' /home/fong/onedrive/Apps/remotely-save/FongArchive/memory0/
+  ```
+- **Nếu tìm thấy tóm tắt liên quan**:
+  - Đọc và phân tích nội dung
+  - Quyết định: cập nhật tóm tắt hiện có hoặc tạo tóm tắt mới bổ sung
+
+### 3. Cấu trúc tóm tắt
+
+#### Định dạng Markdown (.md)
+*Mod by [AI_NAME] on YYYY-MM-DD--HH-MM-AM/PM*
+
+# Tóm tắt cuộc hội thoại: [CHỦ ĐỀ CHÍNH]
+
+## Thông tin chính (Key Information)
+- Điểm quan trọng 1
+- Điểm quan trọng 2
+- ...
+
+## Bài học kinh nghiệm (Lessons Learned)
+- Bài học 1
+- Bài học 2
+- ...
+
+## Ghi chú kỹ thuật (Technical Notes)
+- Ghi chú 1
+- Ghi chú 2
+- ...
+
+## Hành động tiếp theo (Next Actions)
+- Hành động 1
+- Hành động 2
+- ...
+
+## Thuật ngữ (Terminology)
+- `Term 1` /IPA/: Định nghĩa.
+- `Term 2` /IPA/: Định nghĩa.
+- ...
+
+## Động từ (Verbs)
+- `Verb 1` /IPA/: Định nghĩa.
+- `Verb 2` /IPA/: Định nghĩa.
+- ...
+
+## Gợi ý Prompt (Prompt Suggestion)
+- 💡 **Prompt Suggestion:** "..."
+
+---
+Keywords: từ_khóa_1, từ_khóa_2, ... (ít nhất 9 từ khóa tiếng Việt và 9 từ khóa tiếng Anh)
+Related conversations: [DANH SÁCH CÁC TÓM TẮT LIÊN QUAN]
+
+### 4. Nội dung tóm tắt
+
+#### Thông tin chính (Key Information)
+- Tóm tắt 20% thông tin quan trọng nhất từ cuộc hội thoại
+- Tập trung vào mục tiêu, yêu cầu, và kết quả chính
+- Giới hạn 3-5 điểm quan trọng nhất
+
+#### Bài học kinh nghiệm (Lessons Learned)
+- Các bài học rút ra từ cuộc hội thoại
+- Các vấn đề gặp phải và cách giải quyết
+- Các thực hành tốt nhất được áp dụng
+
+#### Ghi chú kỹ thuật (Technical Notes)
+- Các thông tin kỹ thuật quan trọng
+- Các công nghệ, công cụ, hoặc kỹ thuật được sử dụng
+- Các cấu hình, cài đặt hoặc tham số quan trọng
+
+#### Hành động tiếp theo (Next Actions)
+- Các hành động cần thực hiện tiếp theo
+- Các vấn đề còn tồn đọng cần giải quyết
+- Các ý tưởng hoặc đề xuất cho tương lai
+
+### 5. Lưu trữ tóm tắt
+- **Đường dẫn**: `/home/fong/onedrive/Apps/remotely-save/FongArchive/memory0/response-summary-YYYYMMDD-HHMMSS.md`
+- **Tên file**: Sử dụng timestamp để đảm bảo tính duy nhất
+- **Định dạng**: Chỉ sử dụng `.md`.
+- **Cơ chế Fallback**: Nếu không thể tạo file trực tiếp trong đường dẫn trên (ví dụ do quyền hạn), hãy tạo file trong thư mục tạm của dự án (ví dụ: `./tmp/`) rồi dùng lệnh `mv` để di chuyển đến đích.
+
+## Các trường hợp đặc biệt
+
+### Cuộc hội thoại dài
+- Chia tóm tắt thành nhiều phần nếu cần
+- Tạo tóm tắt tổng thể và các tóm tắt con cho từng chủ đề
+- Tạo liên kết giữa tóm tắt và các file bộ nhớ dài hạn liên quan
+
+### Tích hợp với bộ nhớ dài hạn
+- Xem xét chuyển các bài học kinh nghiệm quan trọng vào `.memory/long-term/`
+- Tạo liên kết giữa tóm tắt và các file bộ nhớ dài hạn liên quan
+
+### Cập nhật tóm tắt hiện có
+- Khi cập nhật tóm tắt hiện có, giữ lại phiên bản cũ trong `.history/`
+- Thêm trường `updated_at` và cập nhật nội dung
+
+## Ví dụ tóm tắt
+
+### Ví dụ Markdown
+```markdown
+*Mod by Asi on 2025-06-14--01-30-AM*
+
+# Tóm tắt cuộc hội thoại: Cấu hình Git Push Workflow
+
+## Thông tin chính (Key Information)
+- Tạo quy tắc Git Push Workflow yêu cầu sử dụng `git add .` thay vì thêm từng file riêng lẻ
+- Cập nhật định dạng "Mod by Fong" từ dạng tiêu đề sang dạng in nghiêng
+- Tìm và cập nhật file API key OpenAI cho BoGoAI
+
+## Bài học kinh nghiệm (Lessons Learned)
+- Sử dụng `git add .` giúp đảm bảo không bỏ sót file và duy trì tính toàn vẹn của commit
+- Định dạng in nghiêng (*Mod by...*) thay vì tiêu đề (# Mod by...) tạo cấu trúc văn bản tốt hơn
+- Đặt tên file theo kebab-case và thêm từ khóa giúp dễ tìm kiếm
+
+## Ghi chú kỹ thuật (Technical Notes)
+- Quy trình git push chuẩn: git add . -> git commit -> git push
+- Cấu trúc file memory JSON với các trường metadata chuẩn
+- Sử dụng grep để tìm kiếm hiệu quả trong các thư mục Obsidian
+
+## Hành động tiếp theo (Next Actions)
+- Áp dụng quy tắc git push mới cho các commit trong tương lai
+- Cập nhật các file còn lại có định dạng "Mod by" không đúng
+- Tạo quy trình tự động hóa cho việc tìm kiếm và cập nhật file
+
+## Thuật ngữ (Terminology)
+- `Fallback` /ˈfɔːl.bæk/: (Cơ chế) dự phòng, một phương án hoặc kế hoạch thay thế sẽ được sử dụng khi phương án chính thất bại.
+- `Global Storage` /ˈɡloʊ.bəl ˈstɔːr.ɪdʒ/: Lưu trữ toàn cục, một vị trí lưu trữ có thể truy cập được từ nhiều nơi.
+- `Path` /pæθ/: Đường dẫn, một chuỗi ký tự chỉ định vị trí duy nhất của một file hoặc thư mục.
+
+## Động từ (Verbs)
+- `Verify` /ˈver.ɪ.faɪ/: Xác minh, kiểm tra để chắc chắn rằng một cái gì đó là đúng.
+- `Redirect` /ˌriː.dəˈrekt/: Chuyển hướng, thay đổi đường đi của một cái gì đó.
+- `Specify` /ˈspes.ɪ.faɪ/: Chỉ định, nêu rõ một yêu cầu hoặc chi tiết.
+
+## Gợi ý Prompt (Prompt Suggestion)
+- 💡 **Prompt Suggestion:** "Update the 'rule-conversation-summary.mdc' to change the default storage path..."
+
+---
+Keywords: git workflow, git add, commit, push, định dạng file, mod by fong, api key, bogoai, openai, obsidian notes, tìm kiếm file, đổi tên file, kebab case, version control, file formatting, api authentication, file renaming, search optimization, git best practices
+Related conversations: N/A
+```
+
+---
+Keywords: conversation summary, tóm tắt cuộc hội thoại, pareto principle, nguyên tắc 80/20, machine readability, bài học kinh nghiệm, ghi chú kỹ thuật, hành động tiếp theo, định dạng markdown, định dạng json, tóm tắt hội thoại, knowledge continuity, conversation memory, information extraction, key takeaways, lessons learned, technical notes, next actions, summary structure, conversation history, knowledge management

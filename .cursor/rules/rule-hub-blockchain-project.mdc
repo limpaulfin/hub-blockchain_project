@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Ghi chú cho Dự án Blockchain HUB của Thầy Đức
+
+*Mod by Asi on 2025-06-19--12-35-PM*
+
+## Description
+Quy tắc này đảm bảo rằng tất cả các ghi chú, tài liệu và công việc liên quan đến dự án blockchain hỗ trợ thầy Đức tại HUB được lưu trữ đúng thư mục được chỉ định.
+
+## Glob Patterns
+- `**/*` (Áp dụng cho tất cả các file trong workspace khi từ khóa được kích hoạt)
+
+## Keywords for Activation (Case-Insensitive)
+- `dự án thầy đức`
+- `hub blockchain project`
+- `dự án blockchain hub`
+- `ghi chú blockchain thầy đức`
+
+## Always Apply
+false
+
+## Rules
+
+### 1. Note-taking Directory
+- **Thư mục lưu trữ chính**: `/home/fong/onedrive/Apps/remotely-save/FongObsidian/projects/HUB-blockchain-project-thay-Duc/`
+- Mọi file ghi chú mới (`.md`) liên quan đến dự án này PHẢI được tạo trong thư mục trên.
+
+### 2. File Naming Convention
+- Sử dụng `kebab-case-for-file-names.md`.
+- Tên file nên mô tả rõ ràng nội dung. Ví dụ: `technical-architecture-overview.md`, `meeting-notes-2025-06-19.md`.
+
+### 3. Initial Note Structure
+- Mỗi dự án con hoặc chủ đề lớn nên có một file `index.md` hoặc `overview.md` để làm mục lục.
+
+## Example Usage
+- **User prompt**: "em ơi, tạo ghi chú về cuộc họp cho dự án blockchain thầy đức"
+- **AI Action**: Creates `/home/fong/onedrive/Apps/remotely-save/FongObsidian/projects/HUB-blockchain-project-thay-Duc/meeting-notes-today.md`
+
+## Related Files
+- `/home/fong/onedrive/Apps/remotely-save/FongObsidian/manifest.json`

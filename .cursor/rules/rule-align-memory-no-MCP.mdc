@@ -1,0 +1,261 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Fong on 2025-06-09--09-35-PM*
+
+# Quy Tắc Đồng Bộ Code và Memory (Code-Memory Alignment Rule)
+
+tham khảo thêm quy tắc / hướng dẫn auto-align hay auto-calibrate memory files
+[rule-auto-align-memory.mdc](mdc:.cursor/rules/rule-auto-align-memory.mdc)
+
+## Tổng Quan
+
+**Mục Đích**: Đảm bảo dữ liệu trong `.memory/` luôn phản ánh chính xác và nhất quán với code thực tế trong codebase, tuân theo nguyên tắc Single Source of Truth (SSoT), Don't Repeat Yourself (DRY), và Keep It Simple, Stupid (KISS).
+
+**Phạm Vi Áp Dụng**: Toàn bộ hệ thống memory (`.memory/`) và các file code tương ứng mà memory đang mô tả hoặc tham chiếu tới.
+
+## Nguyên Tắc Cốt Lõi
+
+1. **Tính Nhất Quán (SSoT)**: Mọi thông tin kỹ thuật về một tính năng, module, hoặc thành phần code trong bộ nhớ `.memory/` phải phản ánh chính xác trạng thái hiện tại của code thực tế. Chỉ nên có một nguồn thông tin duy nhất được coi là chính thống.
+
+2. **Tránh Trùng Lặp (DRY)**: Không lưu trữ các thông tin giống nhau ở nhiều nơi trong bộ nhớ. Nếu cần tham chiếu đến cùng một thông tin, hãy sử dụng reference/pointer đến nguồn chính thức.
+
+3. **Đơn Giản Hóa (KISS)**: Thông tin lưu trữ trong memory cần đơn giản, dễ hiểu, và tập trung vào khía cạnh quan trọng nhất của code. Áp dụng nguyên tắc 80/20 (Pareto): 20% thông tin quan trọng nhất giải quyết 80% nhu cầu.
+
+## Quy Trình Đồng Bộ Hóa
+
+### 1. Quy Trình Kiểm Tra Đồng Bộ
+
+```text
+┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
+│  Xác định Module/   │    │  Kiểm tra Code      │    │  Kiểm tra Memory    │
+│  File Cần Kiểm Tra  │───>│  Hiện Tại           │───>│  Hiện Tại           │
+└─────────────────────┘    └─────────────────────┘    └──────────┬──────────┘
+                                                                 │
+┌─────────────────────┐    ┌─────────────────────┐    ┌──────────▼──────────┐
+│   Cập nhật Memory   │<───│   Xác định Điểm     │<───│   So sánh & Phát    │
+│   (Nếu cần)         │    │   Không Đồng Bộ     │    │   hiện Khác biệt    │
+└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
+```
+
+### 2. Các Bước Thực Hiện Kiểm Tra
+
+1. **Khởi Tạo**: 
+   - Xác định rõ file/module code cần kiểm tra tính đồng bộ với memory
+   - Tìm kiếm các file memory liên quan bằng các lệnh grep/find thông minh
+
+2. **Thu Thập Thông Tin**:
+   - Đọc file code hiện tại
+   - Đọc nội dung memory liên quan
+
+3. **So Sánh và Phân Tích**:
+   - So sánh thông tin từ code với thông tin trong memory
+   - Xác định điểm khác biệt hoặc không nhất quán
+
+4. **Cập Nhật**:
+   - Nếu memory không còn chính xác: cập nhật hoặc xóa memory để phản ánh đúng code
+   - Nếu cập nhật lớn: tạo file memory mới với timestamp
+
+## Cách Thức Kiểm Tra và Xác Định
+
+### Smart Search với GREP/FIND
+
+#### 1. Tìm Kiếm Song Ngữ (Anh-Việt) với Nhiều Từ Khóa
+
+```bash
+# Tìm kiếm với từ khóa song ngữ Anh-Việt liên quan đến module cụ thể
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -H -E 'module_name|tên_module|function_name|tên_hàm|component|thành_phần' {} \;
+
+# Tìm kiếm theo chức năng với từ khóa song ngữ mở rộng
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -H -E 'authentication|xác_thực|login|đăng_nhập|security|bảo_mật|user|người_dùng' {} \;
+
+# Tìm kiếm sâu hơn với ngữ cảnh (hiển thị dòng trước và sau kết quả)
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -A 3 -B 3 -E 'api_endpoint|điểm_cuối_api|route|tuyến_đường' {} \;
+```
+
+#### 2. Tìm Kiếm Thông Minh theo Metadata và Tầm Quan Trọng
+
+```bash
+# Tìm các file memory có mức độ quan trọng cao (>= 0.7)
+find ./.memory/ -type f -name "*.json" -not -path "*/.history/*" -exec grep -i -E '"importance":\s*0\.[7-9][0-9]*' {} \;
+
+# Tìm các file memory liên quan đến một file code cụ thể
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -E '"related_files".*"đường_dẫn_tới_file"' {} \;
+
+# Tìm theo tag kỹ thuật với song ngữ
+find ./.memory/ -type f -name "*.json" -not -path "*/.history/*" -exec grep -i -E '"tags".*("api"|"authentication"|"database"|"xác_thực"|"cơ_sở_dữ_liệu")' {} \;
+```
+
+#### 3. Tìm Kiếm Nâng Cao với Regex và Lọc Kết Quả
+
+```bash
+# Tìm chính xác theo pattern cấu trúc dữ liệu
+find ./.memory/ -type f -name "*.json" -not -path "*/.history/*" -exec grep -i -E '"schema":\s*\{' {} \; | sort -u
+
+# Tìm và lọc theo nhiều tiêu chí kết hợp (tính cập nhật + quan trọng)
+find ./.memory/ -type f -name "*.json" -not -path "*/.history/*" -exec grep -i -l -E '"last_updated":.*"2025-(05|06)"' {} \; | xargs grep -i -l -E '"importance":\s*0\.[7-9]'
+
+# Tìm nội dung tiếng Việt trong file (kết hợp nhiều từ khóa)
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -H -E 'mô tả|chức năng|quy trình|đặc tính|giải thích' {} \;
+```
+
+## Quy Tắc Cập Nhật Memory
+
+### 1. Khi Nào Cần Cập Nhật
+
+- Khi phát hiện thông tin trong memory không còn chính xác so với code thực tế
+- Khi thêm mới hoặc thay đổi đáng kể một tính năng/module trong code
+- Khi refactor code làm thay đổi cấu trúc, logic hoặc API
+
+### 2. Những Thông Tin Cần Đặc Biệt Đồng Bộ
+
+- **Logic xử lý chính**: Các thuật toán, quy trình xử lý đặc biệt
+- **API endpoints**: Cấu trúc request/response, parameters
+- **Cấu trúc dữ liệu**: Schema, format JSON/XML, database tables
+- **Quy trình làm việc**: Flow hoạt động của các module quan trọng
+- **Dependencies**: Mối quan hệ giữa các module/functions
+
+### 3. Cách Thức Cập Nhật
+
+- **Thêm mới**: Tạo file memory mới nếu chưa có thông tin về module
+- **Cập nhật**: Chỉnh sửa thông tin trong file memory hiện có
+- **Xóa**: Loại bỏ thông tin không còn chính xác hoặc không còn phù hợp
+- **Đánh dấu**: Thêm trường `last_verified` và `verified_by` khi kiểm tra xong
+
+## Mẫu Metadata Cần Có Trong Memory
+
+```json
+{
+  "title": "Tiêu đề mô tả module/function",
+  "related_files": ["đường_dẫn_tới_file_1", "đường_dẫn_tới_file_2"],
+  "last_updated": "YYYY-MM-DD",
+  "last_verified": "YYYY-MM-DD",
+  "verified_by": "người_verify",
+  "status": "active | deprecated | planned",
+  "importance": 0.8, // 0.0-1.0
+  "description": "Mô tả chi tiết",
+  "technical_details": {},
+  "code_samples": []
+}
+```
+
+## Trách Nhiệm Đảm Bảo Đồng Bộ
+
+- **AI Assistant**: Chủ động kiểm tra và duy trì tính đồng bộ khi làm việc với code
+- **Developer**: Đảm bảo cập nhật memory khi có thay đổi quan trọng trong code
+
+## Quy Trình Xử Lý Khi Phát Hiện Không Đồng Bộ
+
+1. **Đánh Giá Mức Độ Khác Biệt**:
+   - Nhỏ: Chỉnh sửa trực tiếp memory để đồng bộ với code
+   - Lớn: Tạo bản ghi mới, thêm reference đến bản cũ
+
+2. **Cập Nhật Memory**:
+   - Luôn thêm timestamp và người chỉnh sửa
+   - Giữ lại lịch sử các thay đổi quan trọng
+
+3. **Kiểm Tra Tham Chiếu**:
+   - Nếu có file memory khác tham chiếu đến file đã cập nhật, cần cập nhật cả tham chiếu
+
+## Ưu Tiên Đồng Bộ
+
+Thứ tự ưu tiên đồng bộ khi phát hiện không nhất quán:
+
+1. **Critical**: Các module liên quan đến bảo mật, xử lý dữ liệu quan trọng
+2. **High**: Các module core, API endpoints, database schema
+3. **Medium**: Các module, functions thường xuyên được sử dụng
+4. **Low**: Các module phụ trợ, ít sử dụng
+
+## Best Practices
+
+1. **Xác Minh Thường Xuyên**:
+   - Kiểm tra sự đồng bộ định kỳ giữa memory và code
+   - Ưu tiên kiểm tra các module được cập nhật gần đây
+
+2. **Áp Dụng Pareto (80/20)**:
+   - Tập trung đồng bộ 20% thông tin quan trọng nhất
+   - Đảm bảo các thông tin này luôn chính xác và cập nhật
+
+3. **Sử Dụng Tags và Categories**:
+   - Gắn tags cho memory để dễ tìm kiếm
+   - Phân loại memory theo chức năng, module
+
+4. **Giữ Memory Đơn Giản**:
+   - Chỉ lưu trữ thông tin cần thiết
+   - Tránh copy/paste nguyên mã nguồn vào memory
+
+## Quy Trình Kiểm Tra Tự Động
+
+Khi làm việc với một module:
+
+1. Tìm kiếm memory liên quan bằng lệnh find + grep với từ khóa song ngữ
+2. Nếu không tìm thấy memory hoặc thông tin không đầy đủ, tạo memory mới
+3. Nếu tìm thấy memory nhưng thông tin không còn chính xác, cập nhật memory
+4. Đánh dấu đã kiểm tra với thời gian và người kiểm tra
+
+## Ví Dụ Thực Tế
+
+### Tìm và Kiểm Tra Memory cho Module Quiz
+
+```bash
+# Tìm memory liên quan đến module Quiz (song ngữ)
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -H -E 'quiz|bài_kiểm_tra|test|kiểm_tra|assessment|đánh_giá' {} \;
+
+# Tìm sâu hơn với các từ khóa chuyên biệt
+find ./.memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" -exec grep -i -H -E 'dquiz46|quiz_module|module_quiz|wordpress_quiz|wp_quiz' {} \;
+
+# Tìm kiếm chính xác theo file liên quan
+find ./.memory/ -type f -name "*.json" -not -path "*/.history/*" -exec grep -i -E '"related_files".*"quiz.php"|"related_files".*"quiz.js"' {} \;
+```
+
+### Cập Nhật Memory Khi Code Thay Đổi
+
+```json
+// Trước khi cập nhật
+{
+  "title": "DQuiz46 AJAX Handler",
+  "last_updated": "2025-05-01",
+  "endpoint": "/wp-admin/admin-ajax.php?action=fong_dquiz_submit",
+  "parameters": {
+    "old_param": "Giá trị cũ không còn sử dụng"
+  }
+}
+
+// Sau khi cập nhật
+{
+  "title": "DQuiz46 AJAX Handler",
+  "last_updated": "2025-06-09",
+  "last_verified": "2025-06-09",
+  "verified_by": "AI Assistant",
+  "endpoint": "/wp-admin/admin-ajax.php?action=fong_dquiz_submit",
+  "parameters": {
+    "new_param": "Giá trị mới đã cập nhật"
+  },
+  "change_history": [
+    {
+      "date": "2025-06-09",
+      "changes": "Cập nhật parameters do refactor code"
+    }
+  ]
+}
+```
+
+## Kết Luận
+
+Quy tắc đồng bộ hóa code và memory đảm bảo rằng mọi thông tin kỹ thuật lưu trong bộ nhớ `.memory/` luôn phản ánh chính xác trạng thái code hiện tại, giúp:
+
+- Duy trì tính nhất quán (SSoT) của tài liệu kỹ thuật
+- Tránh lặp lại thông tin (DRY)
+- Đơn giản hóa quá trình tham khảo và sử dụng (KISS)
+
+AI Assistant có trách nhiệm chủ động kiểm tra, cập nhật và duy trì sự đồng bộ này, đặc biệt khi làm việc với code hoặc khi phát hiện bất kỳ sự không nhất quán nào.
+
+## Thuật Ngữ Quan Trọng
+
+- **Memory Alignment**: Quá trình đảm bảo dữ liệu trong hệ thống memory phản ánh chính xác code thực tế.
+- **Code Drift**: Hiện tượng code thay đổi nhưng documentation/memory không được cập nhật theo.
+- **Metadata Verification**: Quá trình kiểm tra và xác nhận thông tin metadata trong memory khớp với trạng thái code hiện tại.
+
+

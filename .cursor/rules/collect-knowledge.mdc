@@ -1,0 +1,40 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+id: collect-knowledge-rule
+name: Collect Project Knowledge
+description: |
+  Quy tắc này định nghĩa quy trình thu thập thông tin về mối quan hệ giữa các file,
+  cơ chế hoạt động, và luồng dữ liệu (datapipeline) trong dự án.
+  Kiến thức thu thập được sẽ được lưu trữ để phục vụ cho việc hiểu rõ hơn và bảo trì dự án.
+trigger:
+  type: manual # Hoặc có thể là event-based (ví dụ: on_file_change, on_commit) hoặc để trống nếu kích hoạt thủ công.
+details:
+  objective: "Thu thập và tài liệu hóa mối quan hệ giữa các file, logic hoạt động, và luồng dữ liệu."
+  scope: "Tất cả các file mã nguồn và tài liệu liên quan trong dự án."
+  output:
+    directory: "dkm-knowledge" # Đường dẫn tương đối từ gốc workspace
+    format:
+      - ".md" # Dạng Markdown để diễn giải
+      - ".json" # Dạng JSON cho máy đọc (machine-readable)
+    naming_convention: "[source_file_or_feature]-knowledge.[format]" # Ví dụ: user-authentication-knowledge.md hoặc user.service.ts-knowledge.json
+  process: |
+    1. Xác định các file, module, và tính năng chính cần phân tích.
+    2. Phân tích sự phụ thuộc (dependencies) và biểu đồ lời gọi (call graphs) giữa các file/module.
+    3. Tài liệu hóa chức năng cốt lõi của từng thành phần đã xác định.
+    4. Vạch ra các luồng dữ liệu: cách dữ liệu được nhập, xử lý, và xuất ra qua các thành phần khác nhau.
+    5. Lưu trữ thông tin đã thu thập vào thư mục và định dạng đã chỉ định.
+    6. Thông tin nên được cấu trúc để máy có thể đọc được khi có thể (ví dụ: sử dụng JSON cho dữ liệu có cấu trúc).
+implementation_notes: |
+  - Đối với file .md: Sử dụng tiêu đề rõ ràng, danh sách, và có thể dùng sơ đồ (ví dụ: cú pháp Mermaid nếu được hỗ trợ) để biểu diễn mối quan hệ.
+  - Đối với file .json: Định nghĩa một schema (lược đồ) cho mối quan hệ giữa các file, luồng dữ liệu, v.v.
+  - Quy tắc này nên được áp dụng bởi một AI agent có khả năng phân tích mã nguồn và tạo tài liệu.
+  - Ưu tiên định dạng JSON cho việc lưu trữ có cấu trúc để dễ dàng truy vấn và xử lý tự động sau này.
+  - File Markdown có thể dùng để trình bày tóm tắt hoặc giải thích cho người đọc.
+alwaysApply: false # Quy tắc này không tự động áp dụng mà cần được gọi một cách tường minh.
+priority: medium # Mức độ ưu tiên của quy tắc.
+
+
+

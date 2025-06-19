@@ -1,0 +1,233 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Fong on 2025-06-15--15-32-PM*
+
+# Rule: Universal 150 LOC Refactoring Protocol
+
+**Debug UUID:** `1264476f-6224-483c-98a0-0020170d54fd`
+
+## Core Requirement (KR)
+**Mỗi file code PHẢI <= 150 LOC** (áp dụng cho tất cả ngôn ngữ)
+
+## 5 Tiêu Chí Lựa Chọn Universal
+
+### 1. **KISS Principle** - Đơn giản nhất
+- Function/method có logic đơn giản, ít phức tạp
+- Không có nested conditions phức tạp
+- Dễ hiểu, dễ đọc (bất kể ngôn ngữ)
+
+### 2. **Low Risk** - Ít ảnh hưởng core functionality
+- Không ảnh hưởng business logic chính
+- Utility functions, helper functions
+- UI components đơn giản (CSS/HTML)
+- Configuration/constants
+
+### 3. **Easy Migration** - Tương tự patterns thành công
+- Pattern đã test thành công
+- Không phụ thuộc nhiều dependencies
+- Pure functions hoặc simple utilities
+- Standalone components
+
+### 4. **Quick Win** - Mục tiêu <150 LOC
+- File mới: <150 LOC
+- File gốc: giảm ít nhất 8-10 LOC
+- Tạo module/component có ý nghĩa
+- Không tạp nham, không fragment
+
+### 5. **Safe Testing** - Dễ test và verify
+- Function/component có thể test độc lập
+- Ít side effects
+- Có error handling (nếu áp dụng)
+- Dễ verify functionality
+
+## Function/Component Selection Priority
+- Phân tích file theo 5 tiêu chí universal
+- Chọn function/component đơn giản nhất, rủi ro thấp nhất
+- Ưu tiên theo ngôn ngữ:
+  - **Python**: utility functions, helper functions
+  - **PHP**: helper functions, utility classes
+  - **JavaScript**: utility functions, pure functions
+  - **CSS**: utility classes, mixins, variables
+  - **HTML**: reusable components, partials
+
+## Debug Tracking Requirements (Universal)
+
+**Mỗi debug point PHẢI có UUID** (sử dụng `uuidgen`)
+
+### Debug Points:
+1. **Analysis Start**: Log UUID + file analysis + language
+2. **Component Selection**: Log UUID + selection criteria + language-specific notes
+3. **Implementation**: Log UUID + changes made + language-specific considerations
+4. **Testing**: Log UUID + test results + language-specific verification
+5. **Completion**: Log UUID + final metrics + language
+
+### Debug Format:
+```
+DEBUG [UUID]: [LANG] [Stage] - [Description]
+Example: DEBUG 1264476f-6224-483c-98a0-0020170d54fd: PHP ANALYSIS - UserHelper.php 180 LOC, target: validateEmail()
+Example: DEBUG 1264476f-6224-483c-98a0-0020170d54fd: JS IMPLEMENTATION - utils.js extracted formatCurrency()
+```
+
+## Success Patterns (Multi-Language)
+
+### ✅ Successful Extractions:
+1. **Python**: `startup_utils.py`, `directory_utils.py`
+2. **PHP**: Helper classes, Utility functions
+3. **JavaScript**: Pure functions, Utility modules
+4. **CSS**: Utility classes, Mixins, Variables
+5. **HTML**: Reusable components, Partials
+
+### 📋 Target Candidates (by language):
+
+#### Python
+1. Utility functions, Helper functions
+2. Configuration helpers, Constants
+3. Error handling, Validation functions
+
+#### PHP  
+1. Helper classes, Utility functions
+2. Validation functions, Formatters
+3. Database helpers, API utilities
+
+#### JavaScript/TypeScript
+1. Pure functions, Utility modules
+2. Helper functions, Formatters
+3. Configuration objects, Constants
+
+#### CSS/SCSS
+1. Utility classes, Helper mixins
+2. Variable definitions, Color palettes
+3. Responsive mixins, Animation helpers
+
+#### HTML/Vue/React
+1. Reusable components, UI elements
+2. Template partials, Layout components
+3. Form components, Display components
+
+## Metrics Tracking (Universal)
+
+### Before/After:
+- **Language**: [Python/PHP/JS/CSS/HTML]
+- **Original LOC**: [number]
+- **New Module LOC**: [number] 
+- **Reduced LOC**: [number]
+- **Target Achievement**: [Yes/No]
+
+### Success Criteria (Universal):
+- ✅ Original file LOC reduced
+- ✅ New module < 150 LOC
+- ✅ All tests pass (language-specific)
+- ✅ No functionality broken
+- ✅ Clean git history
+- ✅ Proper imports/includes updated
+
+---
+
+**Nguyên tắc Universal:** Measure twice, cut once. Always backup. Test thoroughly. Language-agnostic approach.
+
+---
+
+## Universal Workflow (5 Steps)
+
+### 1. Analysis & Init
+```bash
+uuidgen  # Tạo UUID debug tracking
+wc -l path/to/target_file.*  # Kiểm tra LOC
+```
+
+### 2. Selection - Chọn function/component theo 5 tiêu chí
+### 3. Implementation
+```bash
+git checkout -b feature/extract-[component-name]
+cp target_file.* target_file.*.$(date '+%Y%m%d-%H-%M-%S').bak
+# Extract + Update imports + Test
+```
+
+### 4. Testing & Verification
+```bash
+wc -l target_file.* new_module.*  # Universal LOC check
+# Language-specific testing
+```
+
+### 5. Git Workflow
+```bash
+git add new_module.* target_file.*
+git commit -m "refactor([lang]): Extract [component] to [new_module]"
+git checkout main && git merge feature/extract-[component-name]
+```
+
+## Language-Specific Commands
+
+### Python (.py)
+```bash
+python3 -c "from src.module import function; print('Import test: OK')"
+```
+
+### PHP (.php)
+```bash
+php -l src/target_file.php  # Syntax check
+php -r "require 'src/new_module.php'; echo 'Import test: OK';"
+```
+
+### JavaScript (.js, .ts)
+```bash
+node -c src/target_file.js  # Syntax check
+node -e "const func = require('./src/new_module.js'); console.log('Import test: OK');"
+```
+
+### CSS (.css, .scss)
+```bash
+sass --check styles/new_module.scss
+```
+
+## File Headers (Language-Specific)
+
+### Python:
+```python
+# src/module_name.py
+# *Mod by Fong on YYYY-MM-DD--HH-MM-PM*
+"""Module description and purpose."""
+```
+
+### PHP:
+```php
+<?php
+// src/ClassName.php  
+// *Mod by Fong on YYYY-MM-DD--HH-MM-PM*
+/**
+ * Class description and purpose
+ */
+```
+
+### JavaScript:
+```javascript
+// src/moduleName.js
+// *Mod by Fong on YYYY-MM-DD--HH-MM-PM*
+/**
+ * Module description and purpose
+ */
+```
+
+### CSS:
+```css
+/* styles/module-name.css */
+/* *Mod by Fong on YYYY-MM-DD--HH-MM-PM* */
+```
+
+## Import Patterns
+
+- **Python:** `from src.new_module import new_function`
+- **PHP:** `require_once 'src/NewModule.php'; use App\Utils\NewModule;`
+- **JavaScript:** `const { newFunction } = require('./src/newModule');`
+- **CSS:** `@import 'styles/new-module.css';`
+
+## Emergency Rollback
+```bash
+# Restore from backup
+cp target_file.*.YYYYMMDD-HH-MM-SS.bak target_file.*
+# Or git reset
+git reset --hard HEAD~1
+```

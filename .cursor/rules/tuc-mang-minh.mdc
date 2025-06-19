@@ -1,0 +1,113 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rule: Túc Mạng Minh - Quy trình Phân tích Lịch sử Toàn diện
+
+## Description
+This rule outlines the comprehensive process for analyzing a file's history. It combines using the `Túc Mạng Minh` tool for local, uncommitted changes and `git log` for official commit history in the repository. This dual approach provides a complete timeline of a file's evolution, from minor saves to major commits.
+
+**Lưu ý quan trọng:** Hướng dẫn này được thiết kế cho hệ điều hành Linux. Nếu các lệnh không chạy hoặc báo lỗi, hãy kiểm tra xem bạn đang sử dụng Linux hay không. Trên Windows, cú pháp lệnh có thể khác một chút (đặc biệt là đường dẫn, dấu gạch chéo, và cách trích dẫn).
+
+## 1. How to Use `Túc Mạng Minh` (For Local History)
+
+The tool is executed via the `main.py` script. The results are always displayed in the console and saved to a timestamped file in `.cursor/rules/tuc-mang-minh/tmp/`.
+
+### Command Structure
+```bash
+python3 .cursor/rules/tuc-mang-minh/main.py <file_path> [options]
+```
+
+### Arguments
+- `file_path`: (Required) The original path of the file to search for (e.g., `src/core/main.py`).
+  - **Note:** If the file path contains spaces, you **must** enclose it in quotes (e.g., `"my folder/my file.py"`).
+  - **Quan trọng:** Luôn sử dụng đường dẫn tương đối từ thư mục gốc của dự án, KHÔNG sử dụng đường dẫn tuyệt đối.
+
+### Options
+- `--text <search_text>`: The text to search for within the file versions.
+  - **Brainstorm:** Nên sử dụng nhiều từ khóa khác nhau và chạy công cụ nhiều lần với các từ khóa khác nhau để có kết quả toàn diện. Không nhất thiết chỉ gọi một lần.
+- `--start-date "<YYYY-MM-DD HH:MM:SS>"`: The start date/time for the search period.
+- `--end-date "<YYYY-MM-DD HH:MM:SS>"`: The end date/time for the search period.
+- `--context <lines>`: Number of context lines to show around a match (default: 5).
+- `--limit <number>`: Limit the search to the N most recent versions (default: 50).
+- `--history-path <path>`: The path to the `.history` directory (default: `./.history`).
+
+### Example
+To search for the string "important function" in the 50 most recent versions of `src/app.js`, showing 3 lines of context for each match:
+```bash
+python3 .cursor/rules/tuc-mang-minh/main.py src/app.js --text "important function" --limit 50 --context 3
+```
+
+## 2. Comprehensive Analysis Workflow (Túc Mạng Minh + Git Diff)
+
+To ensure a thorough analysis of a file's history without missing any changes, it is highly recommended to combine `Túc Mạng Minh` with `git diff`.
+
+### Workflow Steps
+
+1.  **Find All Historical Versions**: Run `Túc Mạng Minh` without any text search to get a complete list of all available historical versions for the file. This provides a high-level overview of all save points.
+    ```bash
+    python3 .cursor/rules/tuc-mang-minh/main.py path/to/your/file.py
+    ```
+    The tool will output a list of historical file paths, for example:
+    - `.history/path/to/your/file_20250530100000.py`
+    - `.history/path/to/your/file_20250530113000.py`
+    - `.history/path/to/your/file_20250530120000.py`
+
+2.  **Analyze Changes with `git diff`**: Use the paths from the previous step to run a `git diff` command. The `--no-index` flag is crucial as these files are not in the Git index. This allows for a detailed, line-by-line comparison between any two points in time.
+
+    **To compare two historical versions:**
+    ```bash
+    git diff --no-index .history/path/to/your/file_20250530100000.py .history/path/to/your/file_20250530113000.py
+    ```
+
+    **To compare a historical version with the current file:**
+    ```bash
+    git diff --no-index .history/path/to/your/file_20250530113000.py path/to/your/file.py
+    ```
+
+This combined workflow ensures you have both a broad overview and a detailed analysis, leaving no gaps in the file's history.
+
+## 3. Quy trình Phân tích Lịch sử Toàn diện (Local + Git) - Dòng thời gian đầy đủ
+
+Để có được một dòng thời gian lịch sử thực sự hoàn chỉnh cho một tệp tin, việc kết hợp cả các lần lưu cục bộ (chưa commit) và các commit chính thức trên Git là cực kỳ quan trọng. Đây là **phương pháp tốt nhất và được khuyến nghị**.
+
+### Các bước thực hiện
+
+1.  **Lấy Lịch sử Cục bộ (Local History)**: Sử dụng `Túc Mạng Minh` để liệt kê tất cả các phiên bản được lưu cục bộ. Thao tác này cho thấy các thay đổi chi tiết, chưa được commit.
+    ```bash
+    python3 .cursor/rules/tuc-mang-minh/main.py path/to/your/file.py
+    ```
+
+2.  **Lấy Lịch sử Git (Git History)**: Sử dụng `git log` để liệt kê tất cả các phiên bản đã được commit. Thao tác này cho thấy các cột mốc quan trọng của tệp.
+    ```bash
+    git log --oneline --follow -- path/to/your/file.py
+    ```
+
+3.  **Tổng hợp Kết quả**: Bằng cách xem xét dấu thời gian (timestamp) từ `Túc Mạng Minh` và ngày commit từ `git log`, bạn có thể xây dựng một lịch sử hoàn chỉnh, theo thứ tự thời gian của tệp tin.
+
+Quy trình hai bước này cung cấp cái nhìn chi tiết và chính xác nhất về toàn bộ vòng đời của một tệp.
+
+## 4. Handling Large Output Files
+
+The output files (`output-*.txt`) can become very large. To avoid overwhelming your terminal or exceeding token limits, use command-line utilities to read them in manageable chunks.
+
+### Best Practices (Limit: 200 LOC)
+
+-   **Read the first 200 lines:**
+    ```bash
+    head -n 200 .cursor/rules/tuc-mang-minh/tmp/output-*.txt
+    ```
+-   **Read the last 200 lines:**
+    ```bash
+    tail -n 200 .cursor/rules/tuc-mang-minh/tmp/output-*.txt
+    ```
+-   **Read a specific range (e.g., lines 201 to 400):**
+    ```bash
+    sed -n '201,400p' .cursor/rules/tuc-mang-minh/tmp/output-*.txt
+    ```
+-   **Filter for a specific keyword:**
+    ```bash
+    grep "your_keyword" .cursor/rules/tuc-mang-minh/tmp/output-*.txt
+    ```
+By following these guidelines, you can efficiently analyze even very large history logs.

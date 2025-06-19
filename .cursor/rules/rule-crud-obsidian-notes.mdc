@@ -1,0 +1,323 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+*Mod by Fong on 2024-06-05--04-25-PM*
+# Quy trình CRUD và Tìm kiếm Ghi chú Obsidian
+
+Tài liệu này định nghĩa quy trình chuẩn để tạo, đọc, và tìm kiếm thông tin trong kho ghi chú Obsidian.
+
+## 1. Điều kiện áp dụng
+
+Các quy tắc trong tài liệu này chỉ áp dụng khi:
+
+- Hệ điều hành hiện tại là **Linux**.
+- Thư mục `/home/fong/onedrive/Apps/remotely-save/` **có tồn tại**.
+
+## 2. Phạm vi Ghi chú & Tìm kiếm
+
+- **Scope 1 (AI Notes - Mặc định):** `/home/fong/onedrive/Apps/remotely-save/FongObsidian/AI-notes/`
+- **Scope 2 (Vault chính):** `/home/fong/onedrive/Apps/remotely-save/FongObsidian/`
+- **Scope 3 (Tất cả vaults):** `/home/fong/onedrive/Apps/remotely-save/`
+
+## 3. Quy trình CRUD
+
+### Nguyên tắc chung (General Principles)
+
+-   **SSoT (Single Source of Truth) & DRY (Don't Repeat Yourself):**
+    -   **BẮT BUỘC:** Trước khi tạo hoặc cập nhật một ghi chú, phải dùng `grep` hoặc các công cụ tìm kiếm khác để rà soát các ghi chú liên quan trong phạm vi đã định.
+    -   Đọc kỹ nội dung tìm được để tránh trùng lặp thông tin và đảm bảo tính nhất quán. Mỗi thông tin chỉ nên tồn tại ở một nơi duy nhất (SSoT).
+-   **Timestamping:** Đầu mỗi file `.md` phải có một dòng ghi chú thời gian tạo/sửa đổi, đóng vai trò là footprint và version. Dòng này phải được tạo bằng lệnh `date` của hệ thống để đảm bảo chính xác.
+    -   Ví dụ: `# Mod by Asi on 2024-06-05--05:00-PM`
+-   **Giới hạn kích thước:** Mỗi file `.md` không nên vượt quá 190 dòng (LOC) để đảm bảo tính súc tích và dễ quản lý.
+-   **Đặt tên file:** Tên file phải hợp lý, súc tích, mô tả đúng nội dung bên trong, và sử dụng `kebab-case-for-file-names.md`.
+-   **Liên kết (Mapping):** Tích cực sử dụng cú pháp `[[Tên file note khác]]` của Obsidian để tạo liên kết hai chiều (bi-directional-link) giữa các ghi chú có liên quan, tạo thành một mạng lưới kiến thức.
+-   **Tags & Keywords:**
+    -   Mỗi file phải có một khu vực `Keywords` ở cuối file để phục vụ cho việc tìm kiếm.
+    -   Phải bao gồm **tối thiểu 9 từ khóa tiếng Việt** và **9 từ khóa tiếng Anh** đa dạng, phù hợp với nội dung.
+    -   Ví dụ:
+        ```markdown
+        ---
+        Keywords: quy trình tìm kiếm, chuẩn hóa, ghi chú obsidian, SSoT, DRY, giới hạn kích thước file, đặt tên file, liên kết obsidian, tags, search process, standardization, obsidian notes, Single Source of Truth, Don't Repeat Yourself, file size limit, file naming, obsidian links, tagging
+        ```
+
+### Create (Tạo mới)
+
+-   Tuân thủ tất cả các **Nguyên tắc chung** ở trên.
+- Nếu không có chỉ định khác, file `.md` mới sẽ luôn được tạo trong **Scope 1**.
+- Mọi ghi chú do AI tạo phải có ghi chú rõ ràng, ví dụ:
+  ```
+  ---
+  _Ghi chú này được tạo tự động bởi AI (Asi)._
+  ```
+
+### Read (Đọc/Tìm kiếm)
+
+1.  **Ưu tiên tìm kiếm trong Scope 1.**
+2.  Nếu không tìm thấy kết quả, **hỏi anh Fong** xem có muốn mở rộng tìm kiếm ra **Scope 2** không.
+3.  Nếu vẫn không có kết quả, tiếp tục **hỏi anh Fong** để quyết định có tìm kiếm trên **Scope 3** hay không.
+
+### Update (Cập nhật)
+
+-   Luôn tuân thủ các nguyên tắc SSoT, DRY, và giới hạn kích thước.
+-   Khi nội dung thay đổi, phải rà soát và cập nhật các liên kết và tags cho phù hợp.
+
+---
+
+## 4. Quy trình Tìm kiếm Chi tiết
+
+Tài liệu này định nghĩa quy trình chuẩn để tìm kiếm thông tin trong kho ghi chú Obsidian, bao gồm các bước từ thu thập từ khóa đến thực thi lệnh tìm kiếm.
+
+Các thư mục tìm kiếm
+
+1. chỉ note do AI tạo (trong OneDrive): `/home/fong/onedrive/Apps/remotely-save/FongObsidian/AI-notes/*` (ưu tiên search ở đây trước)
+2. toàn bộ node (trong OneDrive -> FongObsidian): `/home/fong/onedrive/Apps/remotely-save/FongObsidian/*` (nếu có chỉ định yêu cầu Search trong toàn bộ Note Obsidian thì mới tìm chõ này)
+
+## 1. Ghi nhận Yêu cầu & Từ khóa Gốc
+
+- **Mục tiêu:** Nắm bắt chính xác yêu cầu tìm kiếm từ người dùng.
+- **Hành động:**
+    - Ghi lại các từ khóa chính, thuật ngữ hoặc chủ đề được cung cấp trực tiếp trong prompt.
+    - Ví dụ: Nếu người dùng yêu cầu "tìm tài liệu về Linux Mint", từ khóa gốc là `Linux Mint`.
+
+## 2. Quy trình Brainstorm và Mở rộng Từ khóa
+
+- **Mục tiêu:** Tăng phạm vi tìm kiếm để không bỏ sót các tài liệu liên quan.
+- **Hành động:** Dựa trên từ khóa gốc, mở rộng danh sách bằng các phương pháp sau:
+    - **Từ khóa song ngữ (Anh-Việt):** Liệt kê các thuật ngữ tương đương trong cả tiếng Anh và tiếng Việt.
+    - **Từ đồng nghĩa & gần nghĩa:** Tìm các từ có ý nghĩa tương tự.
+        - Ví dụ: `troubleshooting` -> `fixing`, `debugging`, `issue`, `error`.
+    - **Từ khóa liên quan & phụ thuộc:** Liệt kê các công nghệ, khái niệm, hoặc thành phần có liên quan.
+        - Ví dụ: `Kubuntu` -> liên quan đến `KDE`, `Plasma`, `Ubuntu`. `Linux Mint` -> liên quan đến `Cinnamon`, `Debian`.
+- **Ví dụ kết quả Brainstorm (cho "Linux Mint" & "Kubuntu"):**
+    - `linux mint`, `kubuntu`, `cinnamon`, `kde`, `plasma`, `apt`, `ubuntu`, `debian`, `LTS`, `dual boot`, `nvidia`, `troubleshooting`, `ppa`.
+
+## 3. Xây dựng Lệnh `grep`
+
+- **Mục tiêu:** Tạo một lệnh `grep` hiệu quả, linh hoạt và loại bỏ các kết quả không mong muốn.
+- **Cấu trúc lệnh cơ bản:**
+  ```bash
+  grep [OPTIONS] -E 'keyword1|keyword2|...' [PATH]
+  ```
+- **Các tham số (OPTIONS) quan trọng:**
+    - `-i`: Không phân biệt chữ hoa/thường (case-insensitive).
+    - `-H`: Luôn in tên file cho mỗi kết quả trùng khớp.
+    - `-r`: Tìm kiếm đệ quy trong các thư mục con.
+    - `-E`: Sử dụng biểu thức chính quy mở rộng (cho phép dùng `|` để nối các từ khóa).
+    - `--exclude-dir={dir}`: Loại bỏ một thư mục cụ thể khỏi quá trình tìm kiếm.
+    - `--exclude={glob}`: Loại bỏ các file khớp với một mẫu (glob pattern).
+
+## 4. Quy trình Tìm kiếm Hoàn chỉnh
+
+1.  **Kết hợp Từ khóa:** Nối tất cả các từ khóa đã brainstorm bằng dấu `|`.
+    - `'linux mint|kubuntu|cinnamon|kde|...'`
+
+2.  **Xác định các thư mục & file cần loại trừ:**
+    - Thư mục cache, tạm: `cache`, `__pycache__`
+    - Thư mục quản lý phiên bản/lịch sử: `.history`, `.git`
+    - Thư mục bộ nhớ của AI: `.memory`
+    - Các loại file nặng hoặc không phải văn bản: `*.pdf`, `*.zip`, `*.png`
+    - File sao lưu: `*.bak`, `*backup*`
+
+3.  **Viết lệnh `grep` cuối cùng:**
+    ```bash
+    grep --color=auto -i -H -r -E 'keyword1|keyword2|...' \
+    --exclude-dir='cache' \
+    --exclude-dir='__pycache__' \
+    --exclude-dir='.history' \
+    --exclude-dir='.git' \
+    --exclude-dir='.memory' \
+    --exclude='*.pdf' \
+    --exclude='*.bak' \
+    --exclude='*backup*' \
+    /path/to/search/ | cat
+    ```
+    - **Lưu ý:** Thêm `| cat` vào cuối lệnh để đảm bảo toàn bộ output được hiển thị trong terminal, tránh bị ngắt bởi `pager` (như `less` hoặc `more`).
+
+4.  **Thực thi và Phân tích:**
+    - Chạy lệnh trong terminal.
+    - Xem xét kết quả trả về. Nếu không có kết quả hoặc kết quả quá nhiều, quay lại Bước 2 để tinh chỉnh bộ từ khóa.
+
+## 5. Kỹ thuật Tìm kiếm Nâng cao: Sắp xếp theo Thời gian
+
+- **Mục tiêu:** Tìm kiếm trong các file được sắp xếp theo thời gian chỉnh sửa gần nhất, giúp ưu tiên các ghi chú mới.
+- **Tại sao cần lệnh phức tạp?** Lệnh `grep` không tự hỗ trợ sắp xếp file. Do đó, chúng ta cần kết hợp nhiều lệnh: `find` để lấy danh sách file và thời gian, `sort` để sắp xếp, `sed` để lọc tên file, và `xargs` để đưa danh sách đã sắp xếp vào `grep`.
+
+- **Cấu trúc lệnh:**
+  ```bash
+  find [PATH] [EXCLUSION_RULES] -printf '%T@ %p\n' | sort -rn | sed 's/^[0-9.]* //' | xargs -d '\n' grep [OPTIONS] -E '...'
+  ```
+- **Giải thích các phần:**
+    1.  `find [PATH] [EXCLUSION_RULES] -printf '%T@ %p\n'`:
+        - Tìm tất cả file, áp dụng các quy tắc loại trừ (thư mục và file).
+        - `-printf '%T@ %p\n'`: In ra timestamp của lần sửa cuối cùng, theo sau là đường dẫn file.
+    2.  `sort -rn`:
+        - Sắp xếp danh sách theo số (`-n`) và theo thứ tự đảo ngược (`-r`), đưa file mới nhất lên đầu.
+    3.  `sed 's/^[0-9.]* //'`:
+        - Xóa phần timestamp ở đầu mỗi dòng, chỉ giữ lại đường dẫn file.
+    4.  `xargs -d '\n' grep ...`:
+        - Đưa danh sách đường dẫn file đã được làm sạch và sắp xếp vào lệnh `grep` để xử lý.
+
+- **Ví dụ lệnh hoàn chỉnh:**
+  ```bash
+  find /path/to/search/ \
+  -type d \( -name 'cache' -o -name '__pycache__' -o -name '.history' -o -name '.git' -o -name '.memory' \) -prune \
+  -o -type f ! -name '*.pdf' ! -name '*.bak' ! -name '*backup*' -printf '%T@ %p\n' \
+  | sort -rn \
+  | sed 's/^[0-9.]* //' \
+  | xargs -d '\n' grep -i -H -E 'keyword1|keyword2' | cat
+  ```
+
+## 6. Best Practices và Công cụ Thay thế Hiện đại
+
+Để quy trình tìm kiếm trở nên thông minh, nhanh và hiệu quả hơn, hãy cân nhắc các phương pháp và công cụ sau:
+
+### a. Sử dụng các công cụ thay thế hiện đại
+
+-   **Thay cho `grep` -> `ripgrep` (rg):**
+    -   **Ưu điểm:** Nhanh hơn `grep` đáng kể, mặc định chạy đa luồng. Tự động bỏ qua các file trong `.gitignore` và file nhị phân. Cung cấp output được tô màu, dễ đọc và nhóm theo file.
+    -   **Ví dụ:** `rg 'keyword1|keyword2'`
+
+-   **Thay cho `find` -> `fd`:**
+    -   **Ưu điểm:** Cú pháp đơn giản, trực quan và nhanh hơn `find`. Mặc định bỏ qua các file ẩn và các file trong `.gitignore`.
+    -   **Ví dụ:** `fd -e md -e txt` (tìm các file markdown và text)
+
+### b. Làm cho lệnh tìm kiếm "thông minh" hơn
+
+-   **Tìm kiếm theo ngữ cảnh với Regex:** Thay vì chỉ tìm từ khóa đơn lẻ, sử dụng biểu thức chính quy (regular expression) để khớp với các mẫu phức tạp hơn.
+    -   **Ví dụ:** `grep --color=auto -E "function [a-zA-Z_]+\(.*\)"` để tìm các định nghĩa hàm.
+
+-   **Tìm kiếm trong lịch sử Git:** Khi cần tìm kiếm một sự thay đổi trong quá khứ (ai, khi nào, tại sao một dòng code được thêm/sửa/xóa), `git log` là công cụ cực kỳ mạnh mẽ.
+    -   **Ví dụ:** `git log -G "từ_khóa_cần_tìm" -p` để tìm các commit có thêm hoặc bớt dòng chứa từ khóa đó và hiển thị cả nội dung thay đổi (patch).
+
+### c. Nguyên tắc cốt lõi
+
+-   **Kết hợp (Compose) các công cụ nhỏ:** Giữ vững triết lý của Unix bằng cách kết hợp các công cụ chuyên dụng (`find`, `sort`, `xargs`, `grep`, `rg`, `fd`) qua pipes (`|`) để tạo ra các luồng xử lý mạnh mẽ và linh hoạt.
+-   **Tạo Wrapper Script/Alias:** Chuẩn hóa các lệnh tìm kiếm phức tạp và thường dùng bằng cách tạo các hàm (function) hoặc alias trong file cấu hình shell (`~/.bashrc`, `~/.zshrc`). File quy tắc này chính là một ví dụ về việc chuẩn hóa quy trình.
+
+### d. Kỹ thuật đọc file súc tích (Concise File Reading)
+
+Khi cần đọc nội dung file một cách nhanh chóng mà không cần giữ lại định dạng phức tạp, các lệnh sau đây cực kỳ hữu ích:
+
+-   **Dồn toàn bộ file thành một dòng (Ưu tiên):**
+    -   **Lệnh:** `cat [tên-file] | xargs`
+    -   **Tác dụng:** Loại bỏ tất cả ký tự xuống dòng, nén khoảng trắng thừa. Rất lý tưởng để lấy toàn bộ nội dung file dưới dạng một chuỗi văn bản duy nhất.
+
+-   **Loại bỏ tất cả các dòng trống:**
+    -   **Lệnh:** `awk 'NF' [tên-file]` hoặc `grep . [tên-file]`
+    -   **Tác dụng:** Chỉ hiển thị những dòng có nội dung, giúp output sạch sẽ và tập trung hơn.
+
+-   **Nén các dòng trống kề nhau:**
+    -   **Lệnh:** `cat [tên-file] | tr -s '\n'`
+    -   **Tác dụng:** Gộp nhiều dòng trống liên tiếp thành một dòng trống duy nhất, giữ lại một phần cấu trúc trực quan nhưng gọn gàng hơn.
+
+---
+
+## 7. Quy trình Quản lý Công việc (To-do List Workflow)
+
+Để quản lý và ưu tiên các công việc (tasks/to-dos) một cách hệ thống, chúng ta sẽ áp dụng ma trận Eisenhower ngay trong cấu trúc thư mục của Obsidian.
+
+### a. Cấu trúc thư mục
+
+Các công việc sẽ được phân loại vào 4 thư mục tại gốc của vault (`/home/fong/onedrive/Apps/remotely-save/FongObsidian/`):
+
+-   `01-important-urgent`: **Làm ngay** - Những việc quan trọng và khẩn cấp.
+-   `02-important-not-urgent`: **Lên lịch** - Những việc quan trọng nhưng không khẩn cấp, cần có kế hoạch.
+-   `03-urgent-not-important`: **Ủy thác** - Những việc khẩn cấp nhưng không quan trọng, có thể giao cho người khác.
+-   `04-not-important-not-urgent`: **Loại bỏ/Để sau** - Những việc không quan trọng và không khẩn cấp.
+
+### b. Mẫu Ghi chú Công việc (Task Note Template)
+
+Mỗi công việc là một file `.md` riêng, sử dụng YAML Frontmatter để quản lý siêu dữ liệu một cách chuyên nghiệp.
+
+```markdown
+---
+title: "Tiêu đề công việc ngắn gọn"
+assignee: "Anh Fong"
+status: "pending" # pending | in-progress | completed | on-hold
+priority: "P1" # P1, P2, P3, P4 tương ứng với 4 thư mục
+created_at: "YYYY-MM-DD HH:MM:SS"
+due_date: "YYYY-MM-DD"
+tags:
+  - todo
+  - ten-project
+  - a-keyword-lien-quan
+---
+
+### Mô tả công việc
+(Nội dung chi tiết công việc bằng tiếng Việt ở đây)
+
+### Các bước thực hiện
+- [ ] Bước 1: ...
+- [ ] Bước 2: ...
+- [ ] Bước 3: ...
+
+### Ghi chú thêm
+(Bất kỳ ghi chú liên quan nào khác)
+```
+
+### c. Quy trình tạo và gán việc
+
+1.  **Xác định mức độ ưu tiên:** Khi nhận được yêu cầu tạo to-do, AI sẽ trao đổi với Anh Fong để phân loại công việc vào 1 trong 4 nhóm trên.
+2.  **Tạo file:** AI sẽ tạo một file `.md` mới trong thư mục tương ứng.
+3.  **Điền thông tin:** AI sẽ điền đầy đủ thông tin vào template, đặc biệt là các trường trong YAML frontmatter.
+4.  **Đặt tên file:** Tên file sẽ theo quy ước: `YYYY-MM-DD-[noi-dung-ngan-gon-kebab-case].md`.
+    -   Ví dụ: `2025-06-16-nghien-cuu-api-cho-module-thanh-toan.md`.
+
+## 8. Thiết lập Dashboard và Hệ thống Nhắc nhở
+
+Để có một cái nhìn tổng quan và nhận được thông báo kịp thời, chúng ta kết hợp 3 plugin: **Tasks** (để truy vấn), **Reminder** (để thông báo trên máy tính), và **iCal** (để đồng bộ với lịch di động).
+
+### a. Trang Tổng quan (Dashboard)
+
+-   **Mục đích:** Tạo một nơi duy nhất để xem tất cả các công việc chưa hoàn thành, được nhóm theo ma trận Eisenhower.
+-   **Cách hoạt động:** Chúng ta tạo một file `dashboard.md` tại thư mục gốc của vault. File này sử dụng các khối mã của plugin **Tasks** để tự động tìm và hiển thị các công việc.
+-   **Nội dung file `dashboard.md`:**
+    ```markdown
+    # 🚀 To-do Dashboard 🚀
+
+    ## 🟥 Quan trọng & Khẩn cấp
+    ```tasks
+    not done
+    path includes 01-important-urgent
+    ```
+
+    ## 🟨 Quan trọng & Không khẩn cấp
+    ```tasks
+    not done
+    path includes 02-important-not-urgent
+    ```
+
+    ## 🟩 Không quan trọng & Khẩn cấp
+    ```tasks
+    not done
+    path includes 03-not-important-urgent
+    ```
+
+    ## ⬜️ Không quan trọng & Không khẩn cấp
+    ```tasks
+    not done
+    path includes 04-not-important-not-urgent
+    ```
+    ```
+
+### b. Nhắc nhở trên Máy tính (Plugin: Reminder)
+
+-   **Mục đích:** Nhận thông báo (notification) trên máy tính khi một công việc đến hạn.
+-   **Cách sử dụng:**
+    1.  Cài đặt plugin **Reminder** từ Community Plugins.
+    2.  Trong bất kỳ file công việc nào, thêm biểu tượng ⏰ cùng với ngày và giờ vào cuối dòng công việc.
+    3.  **Cú pháp:** `- [ ] Tên công việc ⏰ YYYY-MM-DD HH:mm`
+    4.  **Ví dụ:** `- [ ] Đồng bộ 3 file quy tắc sang LMS ⏰ 2023-10-28 09:00`
+-   Plugin sẽ tự động quét và tạo thông báo hệ thống khi đến thời gian đã định.
+
+### c. Thông báo trên Điện thoại (Plugin: iCal)
+
+-   **Mục đích:** Đồng bộ các công việc có ngày hạn sang lịch trên điện thoại (Google Calendar, Apple Calendar) để nhận thông báo di động.
+-   **Cách thiết lập:**
+    1.  Cài đặt plugin **iCal** từ Community Plugins.
+    2.  Mở `Settings` > `Community Plugins` > `iCal` (nhấn vào biểu tượng ⚙️).
+    3.  Sao chép (copy) đường link lịch mà plugin cung cấp.
+    4.  Mở ứng dụng lịch của bạn (Google/Apple Calendar), chọn chức năng "Thêm lịch từ URL" (Add from URL / Subscribe to calendar) và dán đường link đã sao chép vào.
+-   Sau khi đăng ký, tất cả công việc có `due_date` hoặc có ngày nhắc nhở (⏰) trong Obsidian sẽ tự động xuất hiện trên lịch của bạn.

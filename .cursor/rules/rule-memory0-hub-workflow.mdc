@@ -1,0 +1,80 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Mod by Asi on 2025-06-14--02:11-AM
+# Hướng dẫn Đồng bộ và Tìm kiếm trong Kho Lưu trữ Memory Trung tâm (Memory Hub)
+
+Tài liệu này định nghĩa quy trình chuẩn để đồng bộ (push) bộ nhớ của một dự án lên kho lưu trữ trung tâm (`memory0`) và cách tìm kiếm thông tin xuyên suốt tất cả các dự án trong đó.
+
+---
+
+## 1. Đồng bộ (Push) Memory từ Dự án lên Memory Hub
+
+Mỗi dự án có một thư mục `.memory/` riêng. Để tận dụng kiến thức giữa các dự án, chúng ta cần đồng bộ chúng vào một nơi duy nhất.
+
+### Mục đích
+-   Tạo một "bộ nhớ" tổng hợp chứa kiến thức từ tất cả các dự án.
+-   Cho phép tìm kiếm và tái sử dụng giải pháp, ghi chú, bài học kinh nghiệm một cách hiệu quả.
+
+### Cách thực hiện
+Dự án này đã được trang bị một script tự động để thực hiện việc này.
+
+-   **Lệnh để chạy:**
+    ```bash
+    ./.cursor/rules/sync-to-memory0.sh
+    ```
+-   **Khi nào cần chạy:**
+    -   Sau khi kết thúc một phiên làm việc.
+    -   Sau khi có những cập nhật quan trọng trong thư mục `.memory/` của dự án hiện tại.
+
+Script sẽ tự động sao chép nội dung từ `.memory/` của dự án vào một thư mục con tương ứng trong kho lưu trữ trung tâm (ví dụ: `/home/fong/onedrive/memory0/[tên-dự-án]/.memory/`).
+
+---
+
+## 2. Tìm kiếm Xuyên Dự án trong Memory Hub
+
+Sau khi đã đồng bộ, anh có thể tìm kiếm trong toàn bộ "bộ nhớ" của mình, bao gồm tất cả các dự án trước đây.
+
+### Nguyên tắc
+-   **Tư duy mở rộng:** Khi tìm kiếm, hãy brainstorm các từ khóa đồng nghĩa, liên quan (cả tiếng Anh và tiếng Việt) để tăng khả năng tìm thấy kết quả.
+-   **Sử dụng `grep`:** Đây là công cụ mạnh mẽ và được ưu tiên để tìm kiếm.
+
+### Lệnh tìm kiếm mẫu
+Đây là lệnh `grep` được khuyến nghị để tìm kiếm trong kho lưu trữ trung tâm. Lệnh này sẽ tự động tìm trong cả `onedrive/memory0` và `OneDrive/memory0`.
+
+```bash
+# Xác định thư mục memory hub
+MEM_HUB=""
+if [ -d "/home/fong/onedrive/memory0" ]; then
+    MEM_HUB="/home/fong/onedrive/memory0"
+elif [ -d "/home/fong/OneDrive/memory0" ]; then
+    MEM_HUB="/home/fong/OneDrive/memory0"
+fi
+
+# Chạy lệnh grep nếu tìm thấy thư mục
+if [ -n "$MEM_HUB" ]; then
+    # Thay 'keyword1|keyword2' bằng các từ khóa thực tế của anh
+    grep --color=auto -r -i -H -E 'keyword1|keyword2' "$MEM_HUB"
+else
+    echo "Lỗi: Không tìm thấy thư mục Memory Hub."
+fi
+```
+
+**Giải thích các tham số `grep`:**
+-   `--color=auto`: Tô màu kết quả cho dễ đọc.
+-   `-r`: Tìm kiếm đệ quy (trong tất cả các thư mục con).
+-   `-i`: Không phân biệt chữ hoa/thường.
+-   `-H`: Luôn hiển thị tên file chứa kết quả.
+-   `-E`: Cho phép sử dụng biểu thức chính quy mở rộng (để dùng `|` cho nhiều từ khóa).
+
+### Ví dụ thực tế
+Để tìm kiếm thông tin về "React hooks" và "state management":
+
+```bash
+# (Giả sử MEM_HUB đã được xác định như trên)
+grep --color=auto -r -i -H -E 'react hook|state management|useState|useEffect|redux|zustand' "$MEM_HUB"
+```
+
+Bằng cách này, anh có thể tìm thấy các ghi chú, đoạn code, hoặc bài học kinh nghiệm từ bất kỳ dự án nào đã được đồng bộ trước đây.

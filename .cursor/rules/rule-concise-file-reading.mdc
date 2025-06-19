@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Fong on 2025-06-15--17-03-PM*
+
+# Quy tắc Đọc File Súc tích (Concise File Reading)
+
+## Nguyên tắc cốt lõi
+
+Khi cần đọc hoặc lấy nội dung của một file dưới dạng một chuỗi văn bản gọn gàng, không có định dạng, hãy sử dụng các công cụ xử lý văn bản của Linux để nén hoặc định dạng lại output.
+
+Phương pháp được đề xuất hàng đầu là sử dụng `cat` kết hợp với `xargs`.
+
+## 1. Phương pháp chính: `cat [file] | xargs` (Ưu tiên)
+
+Phương pháp này dồn toàn bộ nội dung file thành một dòng duy nhất, loại bỏ tất cả các ký tự xuống dòng và nén các khoảng trắng thừa.
+
+-   **Lệnh:**
+    ```bash
+    cat [tên-file] | xargs
+    ```
+-   **Output:** Một dòng văn bản duy nhất.
+-   **Trường hợp sử dụng tốt nhất:**
+    -   Khi cần toàn bộ nội dung file dưới dạng một chuỗi (string) để xử lý.
+    -   Khi muốn xem nhanh toàn bộ văn bản của file mà không quan tâm đến định dạng gốc.
+    -   Khi cần sao chép/dán nội dung file dưới dạng một khối văn bản liền mạch.
+
+## 2. Các phương pháp thay thế
+
+Tùy thuộc vào nhu cầu cụ thể, các lệnh sau cũng rất hữu ích:
+
+### a. `awk 'NF'` (Loại bỏ mọi dòng trống)
+
+-   **Lệnh:** `awk 'NF' [tên-file]`
+-   **Tác dụng:** Chỉ in ra các dòng có chứa nội dung (số trường > 0). Loại bỏ hoàn toàn các dòng trống.
+
+### b. `grep .` (Tương tự `awk 'NF'`)
+
+-   **Lệnh:** `grep . [tên-file]`
+-   **Tác dụng:** Chỉ in ra các dòng chứa ít nhất một ký tự.
+
+### c. `tr -s '\n'` (Nén các dòng trống)
+
+-   **Lệnh:** `cat [tên-file] | tr -s '\n'`
+-   **Tác dụng:** Nén nhiều dòng trống liên tiếp thành một dòng trống duy nhất. Giữ lại cấu trúc cơ bản nhưng làm code gọn hơn.
+
+---
+Keywords: concise reading, read file, cat, xargs, awk, grep, tr, squeeze, one line, compact output, file content, terminal, cli, đọc file, đọc file ngắn gọn, xem file, dòng lệnh

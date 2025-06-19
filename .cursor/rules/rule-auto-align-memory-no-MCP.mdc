@@ -1,0 +1,247 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Quy Tắc Auto-Align Memory - Memory Alignment System
+
+tham khảo [rule-align-memory.mdc](mdc:.cursor/rules/rule-align-memory.mdc) 
+
+## Command Template để Tìm Files Cũ Nhất
+
+nguyên tắc
+- DRY
+- SSoT 
+- file Memory là Machine Readable, đảm bảo chân phương, chính xác, cập nhật (up-to-date), tường minh và có link / mapping tới related files chính xác (dùng đường dẫn từ root đi vào)
+
+### Lệnh Cơ Bản (Đường dẫn tương đối từ root dự án)
+
+```bash
+find .memory -type f \( -name "*.json" -o -name "*.jsonl" -o -name "*.md" -o -name "*.mmd" -o -name "*.txt" \) \
+-not -path "*/.history/*" \
+-not -path "*/.git/*" \
+-not -path "*/.bak/*" \
+-not -path "*/brain_src/*" \
+-not -path "*/__pycache__/*" \
+-not -path "*/.venv/*" \
+-not -path "*/venv/*" \
+-not -path "*/node_modules/*" \
+-not -name "brain_data.json" \
+-not -name "manifest.json" \
+-not -name "*.py" \
+-printf '%T@ %p\n' | sort -n | head -10
+```
+
+### Hiển Thị Chi Tiết
+
+```bash
+find .memory -type f \( -name "*.json" -o -name "*.jsonl" -o -name "*.md" -o -name "*.mmd" -o -name "*.txt" \) \
+-not -path "*/.history/*" -not -path "*/.git/*" -not -path "*/.bak/*" -not -path "*/brain_src/*" \
+-not -path "*/__pycache__/*" -not -path "*/.venv/*" -not -path "*/venv/*" -not -path "*/node_modules/*" \
+-not -name "brain_data.json" -not -name "manifest.json" -not -name "*.py" \
+-printf '%T@ %p\n' | sort -n | head -10 | awk '{print $2}' | while read file; do 
+    echo "=== $(basename "$file") ==="
+    ls -lah "$file"
+    echo "Path: $file"
+    echo
+done
+```
+
+### Giải Thích Loại Trừ
+
+- `*/.history/*` - Thư mục lịch sử backup
+- `*/.git/*` - Thư mục Git
+- `*/.bak/*` - Files backup  
+- `*/brain_src/*` - Thư mục brain source code
+- `*/__pycache__/*` - Python cache
+- `*/.venv/*` và `*/venv/*` - Virtual environments
+- `*/node_modules/*` - Node.js dependencies
+- `brain_data.json` - File dữ liệu brain chính
+- `manifest.json` - File manifest chính
+- `*.py` - Files Python source code
+
+## Smart GREP/FIND Techniques
+
+### 1. Tìm Kiếm Song Ngữ (Anh-Việt)
+
+Để tăng khả năng tìm kiếm hiệu quả, kết hợp từ khóa cả tiếng Anh và tiếng Việt trong cùng một lệnh grep:
+
+```bash
+# Tìm kiếm thông tin liên quan đến database/cơ sở dữ liệu
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -H -E 'database|cơ sở dữ liệu|db schema|schema|bảng|table|structure|cấu trúc' {} \;
+
+# Tìm kiếm thông tin về authentication/xác thực
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -H -E 'authentication|xác thực|đăng nhập|login|user|người dùng|password|mật khẩu' {} \;
+
+# Tìm kiếm thông tin API endpoints
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -H -E 'api endpoint|điểm cuối|route|tuyến đường|ajax|fetch|request|yêu cầu' {} \;
+```
+
+### 2. Tìm Kiếm Với Nhiều Từ Khóa Liên Quan
+
+```bash
+# Tìm kiếm với các từ khóa liên quan đến một module
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -H -E 'module_name|related_name|alternative_name|function_x|function_y' {} \;
+
+# Tìm kiếm với từ khóa chuyên ngành và từ đồng nghĩa
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -H -E 'performance|hiệu suất|optimization|tối ưu hóa|speed|tốc độ|cache|bộ nhớ đệm' {} \;
+```
+
+### 3. Tìm Kiếm Thông Minh Kết Hợp Với Context
+
+```bash
+# Tìm và hiển thị 3 dòng trước và sau kết quả
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -A3 -B3 -H 'important_keyword' {} \;
+
+# Tìm file với nhiều từ khóa xuất hiện cùng lúc
+find .memory/ -type f \( -name "*.json" -o -name "*.md" \) -not -path "*/.history/*" \
+-exec grep -i -l 'keyword1' {} \; | xargs grep -i -l 'keyword2'
+```
+
+### 4. Tìm Kiếm Advanced với Regex
+
+```bash
+# Tìm các file có mức importance >= 0.7
+find .memory/ -type f -name "*.json" -not -path "*/.history/*" \
+-exec grep -i -E '"importance":\s*0\.[7-9][0-9]*' {} \;
+
+# Tìm các file được cập nhật gần đây (2025-05 hoặc 2025-06)
+find .memory/ -type f -name "*.json" -not -path "*/.history/*" \
+-exec grep -i -E '"last_updated":\s*"2025-(05|06)' {} \;
+
+# Tìm các file có trạng thái ALIGNED
+find .memory/ -type f -name "*.json" -not -path "*/.history/*" \
+-exec grep -i -E '"alignment_status":\s*"ALIGNED"' {} \;
+```
+
+## Memory Alignment Workflow
+
+### Phase 1: Discovery & Assessment
+1. **Tìm files cũ nhất**: Sử dụng command trên để lấy 10 files cũ nhất
+2. **Ghi log bắt đầu**: Tạo/cập nhật `.memory/alignment-calibration-log.json`
+3. **Đánh giá độ ưu tiên**: Critical → High → Medium → Low
+
+### Phase 2: Systematic Alignment
+4. **READ**: Đọc và phân tích nội dung từng file
+5. **VERIFY**: So sánh với code thực tế sử dụng grep/find
+6. **ASSESS**: Đánh giá alignment status
+7. **UPDATE**: 
+   - Nếu ALIGNED: Cập nhật metadata aligned + timestamp
+   - Nếu OUTDATED: UPDATE hoặc DELETE
+   - Nếu MISSING: CREATE file mới
+
+### Phase 3: Documentation & Logging
+8. **Log completion**: Ghi timestamp hoàn thành vào alignment log
+9. **Update metadata**: Thêm trường `alignment_status` vào file gốc
+10. **Status report**: Tổng hợp kết quả alignment
+
+## Timing & Frequency Guidelines
+
+- **Alignment Frequency**: ~48 tiếng so với lần làm việc cuối cùng
+- **Batch Size**: 10 files/lần để đảm bảo quality
+- **Log Retention**: 30 logs gần nhất trong alignment-calibration-log.json
+
+## Alignment Logging System
+
+### Log File: `.memory/alignment-calibration-log.json`
+```json
+{
+  "logs": [
+    {
+      "timestamp_unix": 1749358572,
+      "timestamp_human": "2025-06-08 11:56:18",
+      "action": "alignment_start",
+      "files_count": 10,
+      "session_id": "align_session_xxx"
+    },
+    {
+      "timestamp_unix": 1749358800,
+      "timestamp_human": "2025-06-08 12:00:00", 
+      "action": "file_aligned",
+      "file": "README.md",
+      "status": "ALIGNED",
+      "result": "✅ Directory structure chính xác"
+    }
+  ],
+  "metadata": {
+    "last_alignment": "2025-06-08 11:56:18",
+    "total_sessions": 15,
+    "files_processed": 150
+  }
+}
+```
+
+### File Metadata Update Template
+Thêm vào mỗi file đã aligned:
+```json
+{
+  // ... existing content ...
+  "alignment_metadata": {
+    "last_calibrated": {
+      "timestamp_unix": 1749358572,
+      "timestamp_human": "2025-06-08 11:56:18"
+    },
+    "alignment_status": "ALIGNED",
+    "alignment_result": "✅ Verified against codebase - fully accurate",
+    "calibration_notes": "Content matches exactly with actual implementation"
+  }
+}
+```
+
+## Ưu Tiên Alignment
+
+1. **Critical**: ACF fields, database schemas, core configuration
+2. **High**: Action hooks, API endpoints, middleware
+3. **Medium**: UI components, helpers, utilities  
+4. **Low**: Documentation, logs, temporary files
+
+## Command Shortcuts
+
+### Get Current Timestamps
+```bash
+# Unix timestamp
+date +%s
+
+# Human readable
+date '+%Y-%m-%d %H:%M:%S'
+
+# Both at once
+echo "$(date +%s) | $(date '+%Y-%m-%d %H:%M:%S')"
+```
+
+### Quick Status Check
+```bash
+# Count total memory files
+find .memory -name "*.json" -o -name "*.md" | wc -l
+
+# Count aligned files (grep for alignment_status)
+grep -r "alignment_status.*ALIGNED" .memory --include="*.json" | wc -l
+```
+
+## Tìm Kiếm Nâng Cao Theo Thời Gian và Sắp Xếp
+
+```bash
+# Tìm files được tạo/sửa trong 7 ngày gần đây và sắp xếp từ mới nhất đến cũ nhất
+find .memory -type f \( -name "*.json" -o -name "*.md" \) -mtime -7 -printf '%T@ %p\n' | sort -rn | awk '{print $2}'
+
+# Tìm và hiển thị các file chưa được cập nhật trong 30 ngày
+find .memory -type f \( -name "*.json" -o -name "*.md" \) -mtime +30 -printf '%T@ %p\n' | sort -n
+```
+
+## Tags cho Easy Search
+
+- `#memory-alignment`
+- `#find-old-files` 
+- `#crud-memory`
+- `#ssot-maintenance`
+- `#systematic-calibration`
+- `#quality-assurance`
+- `#song-ngữ-search`
+- `#smart-grep`
+- `#advanced-find`

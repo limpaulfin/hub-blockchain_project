@@ -1,0 +1,164 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Code Analysis and Documentation Generation
+
+## Overview
+Quy tắc này hướng dẫn phân tích mã nguồn (DOM, tương tác, logic...) sử dụng lệnh Linux (grep, find) và đọc file để hiểu data pipeline và business logic. Kết quả là file Markdown (.md) mô tả pipeline, pseudo-code, sơ đồ ASCII, và file JSON (.json) chứa dữ liệu có cấu trúc.
+
+## Kích hoạt
+Khi nhận các từ khóa:
+- analyze codebase for documentation
+- document data pipeline
+- understand business logic from code
+- phân tích mã nguồn tạo tài liệu
+- tạo tài liệu data pipeline
+- hiểu business logic từ code
+- collect knowledge from code
+
+## Các bước thực hiện
+
+### 1. Hiểu mục tiêu và phạm vi
+- Làm rõ phần cụ thể của codebase, chức năng hoặc data pipeline cần phân tích
+- Xác định độ sâu và rộng của phân tích
+
+**Công cụ gợi ý:** Trò chuyện
+
+### 2. Kiểm tra kiến thức và bộ nhớ hiện có
+- Tìm kiếm thông tin hiện có:
+  - Kiểm tra thư mục `docs/technical-note-knowledge/`
+  - Tìm tên thư mục phù hợp (ví dụ: `[feature_slug]-[timestamp]`)
+  - Đọc file `manifest.json` và `analysis-doc.md` để đánh giá mức độ liên quan
+  - Tìm kiếm trong `.memory` với từ khóa liên quan
+- Tóm tắt phát hiện cho người dùng
+- Thảo luận với người dùng để quyết định:
+  - Sử dụng/cập nhật thông tin hiện có
+  - Tiến hành phân tích hoàn toàn mới
+  - Kết hợp thông tin hiện có với phân tích mới
+
+**Công cụ gợi ý:** list_dir, read_file, grep_search
+
+### 3. Khám phá code ban đầu (Tổng quan)
+- Sử dụng `find` và `grep` để xác định các file liên quan (PHP, JS, CSS, templates, logs, cấu hình)
+- Tìm kiếm manh mối văn bản như tên hàm, tên lớp, tên biến, hook, event listener, API endpoint, tên hành động AJAX, cấu trúc payload client, từ khóa đặc biệt liên quan đến tính năng/pipeline, thông báo lỗi
+
+**Công cụ gợi ý:** run_terminal_cmd (find, grep), codebase_search
+
+**Lệnh ví dụ:**
+```
+find . -type f -name "*.php" -exec grep -i -H "relevant_hook_or_function_pattern" {} \;
+find ./src/ -type f -name "*.js" -exec grep -i -H "event_listener_pattern\|ajax_action_name" {} \;
+grep -r -i -l --include=\*.php --include=\*.js "keyword_related_to_feature" .
+```
+
+### 4. Phân tích sâu - Đọc file & Phân tích tĩnh
+- Đọc nội dung các file chính để hiểu cấu trúc, logic, hàm, lớp và cách chúng tương tác
+- Chú ý đến comment và doc block
+
+**Công cụ gợi ý:** read_file
+
+### 5. Phân tích DOM & Frontend (nếu liên quan)
+- Phân tích cấu trúc HTML, CSS selector và JavaScript DOM manipulation
+- Sử dụng `grep` cho phân tích tĩnh của file HTML/JS
+- Nếu DOM được tạo động, yêu cầu người dùng cung cấp đoạn DOM liên quan
+
+**Công cụ gợi ý:** run_terminal_cmd (grep cho selector, event listener), read_file (template HTML/JS, file tạo HTML)
+
+**Lệnh grep frontend ví dụ:**
+```
+grep -r -i --include=\*.js "addEventListener('click'" .
+grep -r -i --include=\*.php "echo '<div id=\"important-element\"'" .
+```
+
+### 6. Tổng hợp thông tin - Lập sơ đồ Data Pipeline & Business Logic
+- Vẽ ra luồng dữ liệu: từ user input/event -> JS processing -> AJAX -> Backend -> Output/Response -> JS updates DOM
+- Mô tả business logic cốt lõi bằng pseudo-code, tập trung vào điều kiện, vòng lặp và hoạt động chính
+
+**Kiểu output:** Quá trình tư duy nội bộ, dẫn đến nội dung MD/JSON
+
+### 7. Xác nhận vị trí output & ý định tạo file
+- Trước khi tạo file output:
+  1. Đề xuất vị trí lưu trữ mặc định: `docs/technical-note-knowledge/[feature_or_pipeline_name_slugified]-[timestamp]/`
+  2. Hỏi người dùng có muốn sử dụng vị trí mặc định, cung cấp vị trí tùy chỉnh, hoặc bỏ qua việc tạo file
+  3. Đảm bảo đường dẫn hợp lệ
+  4. Tiến hành nếu người dùng xác nhận
+  5. Thư mục output đã chọn sẽ được sử dụng cho file MD, JSON và manifest
+
+**Công cụ gợi ý:** Trò chuyện
+
+### 8. Tạo tài liệu Markdown (.md)
+- Tạo file Markdown chứa:
+  1. **Tổng quan:** Mô tả ngắn gọn về tính năng/pipeline được phân tích
+  2. **Data Pipeline:** Mô tả luồng dữ liệu bằng text hoặc sơ đồ ASCII
+  3. **Business Logic:** Pseudo-code cho các thuật toán hoặc điểm quyết định chính
+  4. **Thành phần chính:** Danh sách file, hàm, lớp và hook quan trọng
+  5. **Sơ đồ ASCII:** Cho luồng phức tạp, chuyển đổi trạng thái hoặc tương tác thành phần
+  6. **Câu hỏi mở/Giả định:** Bất kỳ điểm không rõ hoặc giả định nào
+  
+  **Lưu ý ngôn ngữ:** Tiếng Việt có thể được sử dụng cho mô tả chung, thuật ngữ kỹ thuật nên giữ bằng tiếng Anh hoặc định nghĩa rõ ràng
+
+**Công cụ gợi ý:** edit_file
+
+**Quy ước đặt tên:** analysis-doc.md
+
+**Vị trí lưu trữ gợi ý:** docs/technical-note-knowledge/[feature_or_pipeline_name_slugified]-[timestamp]/
+
+### 9. Tạo dữ liệu có cấu trúc JSON (.json)
+- **Ngôn ngữ và thuật ngữ:** Tất cả key và giá trị chuỗi PHẢI sử dụng thuật ngữ kỹ thuật tiếng Anh chính xác
+- Tạo file JSON chứa dữ liệu có cấu trúc:
+  1. `feature_name`: String
+  2. `analyzed_timestamp`: Unix timestamp
+  3. `key_files`: Array of objects [{path: string, description: string}]
+  4. `key_functions_methods`: Array of objects [{name: string, file_path: string, description: string}]
+  5. `hooks_used_or_defined`: Array of objects [{name: string, type: string, callback_origin: string, purpose: string}]
+  6. `api_endpoints_involved`: Array of objects [{url_pattern: string, method: string, purpose: string}]
+  7. `data_structures`: Array of objects [{name: string, structure: object|array, description: string}]
+
+**Công cụ gợi ý:** edit_file
+
+**Quy ước đặt tên:** analysis-data.json
+
+**Vị trí lưu trữ gợi ý:** docs/technical-note-knowledge/[feature_or_pipeline_name_slugified]-[timestamp]/
+
+### 10. Tạo file Manifest (manifest.json)
+- Tạo file `manifest.json` trong cùng thư mục con với nội dung:
+```json
+{
+  "feature_name": "[feature_or_pipeline_name]",
+  "analysis_timestamp": "[timestamp]", 
+  "markdown_file": "analysis-doc.md",
+  "json_data_file": "analysis-data.json",
+  "description": "Knowledge capture for [feature_or_pipeline_name] analyzed on [YYYY-MM-DD]."
+}
+```
+
+**Công cụ gợi ý:** edit_file
+
+**Quy ước đặt tên:** manifest.json
+
+**Vị trí lưu trữ gợi ý:** docs/technical-note-knowledge/[feature_or_pipeline_name_slugified]-[timestamp]/
+
+### 11. Xem xét và tinh chỉnh
+- Xem lại file MD, JSON và manifest đã tạo để đảm bảo độ chính xác, rõ ràng và đầy đủ
+- Yêu cầu phản hồi từ người dùng nếu cần
+- Lặp lại phân tích và tài liệu dựa trên phản hồi
+
+**Công cụ gợi ý:** read_file, edit_file, Trò chuyện
+
+## Sản phẩm đầu ra
+- **Markdown:** Tài liệu Markdown dễ đọc chi tiết phân tích, data pipeline, pseudo-code và sơ đồ ASCII
+- **JSON:** File JSON máy đọc được chứa dữ liệu có cấu trúc trích xuất từ phân tích code
+
+## Thực tiễn tốt nhất
+- Tập trung vào mục tiêu và phạm vi cụ thể từ người dùng để tránh phân tích quá rộng
+- Sử dụng `grep` và `find` hiệu quả với mẫu cụ thể để thu hẹp không gian tìm kiếm
+- Chia nhỏ hệ thống phức tạp thành phần nhỏ hơn, dễ quản lý để phân tích, tài liệu từng phần rồi tổng hợp
+- Luôn xác minh giả định bằng cách kiểm tra code trực tiếp, không chỉ dựa vào quy ước đặt tên
+- Đảm bảo sơ đồ ASCII rõ ràng và tuân theo quy ước chuẩn
+- Duy trì danh sách "known unknowns" hoặc lĩnh vực cần điều tra thêm
+- Khi lập tài liệu, cung cấp ngữ cảnh cho lý do tại sao lựa chọn thiết kế nhất định được thực hiện
+
+## Các quy tắc liên quan
+- .cursor/rules/*

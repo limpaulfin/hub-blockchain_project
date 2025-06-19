@@ -197,11 +197,7 @@ private_keys/
 # Performance & Profiling
 # ===============================================
 
-# Profiling data
-*.prof
-*.profile
-*.dump
-core.*
+
 
 # Benchmark results
 benchmark_results/
@@ -211,19 +207,6 @@ benchmark_results/
 # Deployment & Infrastructure
 # ===============================================
 
-# Docker
-Dockerfile.*
-docker-compose.override.yml
-.dockerignore
-
-# Kubernetes
-*.k8s.yaml
-*.k8s.yml
-
-# Terraform
-*.tfstate
-*.tfstate.*
-.terraform/
 
 # ===============================================
 # Development Tools
@@ -264,7 +247,6 @@ yarn-error.log*
 
 # Git files
 .git/
-.gitignore
 
 # ===============================================
 # Cursor Specific
@@ -274,18 +256,10 @@ yarn-error.log*
 # Project Specific Exclusions
 # ===============================================
 
-# Large research files
-*.pdf
-*.docx
-*.pptx
 
 # Compiled documentation
 site/
 
-# Database files
-*.db
-*.sqlite
-*.sqlite3
 
 # Configuration backups
 *.conf.bak

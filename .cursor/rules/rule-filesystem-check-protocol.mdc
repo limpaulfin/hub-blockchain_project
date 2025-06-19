@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+*Mod by Fong on 2025-06-15--17-03-PM*
+
+# Quy tắc Kiểm tra Cấu trúc File/Thư mục
+
+## Nguyên tắc cốt lõi
+
+Khi cần kiểm tra sự tồn tại của một file hoặc thư mục, đặc biệt khi không chắc chắn về đường dẫn chính xác hoặc muốn có cái nhìn tổng quan về cây thư mục, **ưu tiên sử dụng lệnh `tree` thay vì `ls`**.
+
+## Lý do
+
+-   **`ls`**: Chỉ liệt kê nội dung của một thư mục cụ thể. Nếu file cần tìm nằm sâu trong các thư mục con, `ls` sẽ không thể hiện ra, dẫn đến kết luận sai rằng file không tồn tại.
+-   **`tree`**: Hiển thị toàn bộ cây thư mục từ một điểm gốc, cung cấp cái nhìn trực quan và đầy đủ. Điều này giúp xác nhận sự tồn tại của file một cách chắc chắn hơn và hiểu rõ hơn về cấu trúc lưu trữ, tránh bỏ sót.
+
+## Các trường hợp áp dụng
+
+### 1. Khi kiểm tra sự tồn tại của file/thư mục
+
+-   **Nên dùng (✅):**
+    ```bash
+    # Kiểm tra cây thư mục .cursor/rules để xem có file nào liên quan đến 'manifest'
+    tree .cursor/rules | grep -i 'manifest'
+    ```
+
+-   **Không nên dùng (❌):**
+    ```bash
+    # Lệnh này có thể không tìm thấy file nếu nó không nằm ngay trong thư mục gốc
+    ls .cursor/rules | grep -i 'manifest'
+    ```
+
+### 2. Khi cần khám phá cấu trúc một thư mục lạ
+
+-   **Nên dùng (✅):**
+    ```bash
+    # Xem cấu trúc của thư mục .memory, giới hạn độ sâu 3 cấp để dễ đọc
+    tree -L 3 .memory
+    ```
+
+## Khi nào có thể dùng `ls`?
+
+Vẫn có thể sử dụng `ls` trong các trường hợp đơn giản khi:
+-   Anh chắc chắn 100% file/thư mục cần tìm nằm ngay tại đường dẫn đó.
+-   Chỉ cần liệt kê nhanh nội dung của một thư mục duy nhất.
+
+---
+Keywords: file system, check file, file exists, directory check, tree command, ls command, file structure, directory tree, best practice, file checking protocol, hệ thống file, kiểm tra file, kiểm tra thư mục, lệnh tree, lệnh ls, cấu trúc thư mục, cây thư mục

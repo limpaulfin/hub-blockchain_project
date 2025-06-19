@@ -1,0 +1,491 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+*Mod by Fong on 2025-06-15--21-04-PM*
+
+---
+description: Linux Command Line Web Browsers and Website Checking Tools
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+# AI Guidelines for Command Line Internet Browsing
+
+## Khi nào AI nên duyệt internet bằng command line
+
+AI **NÊN** sử dụng command line để duyệt internet và đọc nội dung trong các trường hợp sau:
+
+1. **Thu thập thông tin thời sự**
+   - Đọc tin tức mới nhất từ các website
+   - Lấy thông tin cập nhật về công nghệ, giá cả
+   - Tìm hiểu xu hướng hiện tại
+
+2. **Nghiên cứu và học tập**
+   - Đọc bài viết kỹ thuật, documentation
+   - Thu thập dữ liệu từ các trang web chính thức
+   - Tìm hiểu thông tin sản phẩm, dịch vụ
+
+3. **Xác minh thông tin**
+   - Cross-check facts từ nhiều nguồn
+   - Đọc nội dung để confirm độ chính xác
+   - Tìm nguồn gốc thông tin
+
+4. **Content analysis**
+   - Phân tích nội dung website
+   - So sánh thông tin từ nhiều sources
+   - Extract specific data points
+
+## Công cụ chính để duyệt nội dung internet
+
+### w3m - Text Browser chính (Recommended)
+```bash
+# Duyệt website interactively
+w3m https://example.com
+
+# Lấy toàn bộ nội dung text
+w3m -dump https://example.com
+
+# Lấy nội dung với formatting
+w3m -dump -T text/html https://example.com
+```
+
+### curl - Lấy raw content
+```bash
+# Lấy HTML content
+curl -s https://example.com
+
+# Lấy content với follow redirects
+curl -sL https://example.com
+
+# Lấy content với user agent
+curl -sL -A "Mozilla/5.0" https://example.com
+```
+
+### lynx - Alternative text browser
+```bash
+# Duyệt với lynx
+lynx https://example.com
+
+# Dump text content
+lynx -dump https://example.com
+```
+
+## Quy trình duyệt internet cho AI
+
+### Bước 1: Lấy nội dung chính
+```bash
+# Ưu tiên w3m để lấy nội dung có format
+w3m -dump https://example.com > content.txt
+
+# Hoặc dùng curl cho raw HTML
+curl -sL https://example.com > raw_content.html
+```
+
+### Bước 2: Xử lý và lọc thông tin
+```bash
+# Lấy những dòng có từ khóa quan trọng
+w3m -dump https://example.com | grep -i "keyword" | head -10
+
+# Lấy title của trang
+curl -s https://example.com | grep -o "<title>[^<]*" | sed 's/<title>//'
+
+# Lấy meta description
+curl -s https://example.com | grep -i 'meta.*description' | head -1
+```
+
+### Bước 3: Content analysis và extraction
+```bash
+# Đếm từ trong nội dung
+w3m -dump https://example.com | wc -w
+
+# Tìm links trong trang
+curl -s https://example.com | grep -o 'href="[^"]*' | sed 's/href="//'
+
+# Extract email addresses
+w3m -dump https://example.com | grep -oE '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+```
+
+## Practical Examples cho AI
+
+### Đọc tin tức từ website
+```bash
+# Lấy headlines từ trang tin tức
+w3m -dump https://vnexpress.net | grep -E "^[A-Z].*[.!?]$" | head -5
+```
+
+### Thu thập thông tin sản phẩm
+```bash
+# Lấy thông tin giá từ e-commerce site
+w3m -dump https://example-shop.com/product | grep -i "price\|giá" | head -3
+```
+
+### Đọc documentation kỹ thuật
+```bash
+# Lấy code examples từ documentation
+w3m -dump https://docs.example.com | grep -A 5 -B 2 "```"
+```
+
+### Research và fact-checking
+```bash
+# So sánh thông tin từ nhiều nguồn
+echo "Source 1:" && w3m -dump https://source1.com | grep -i "topic" | head -2
+echo "Source 2:" && w3m -dump https://source2.com | grep -i "topic" | head -2
+```
+
+## Advanced Content Browsing Techniques
+
+### Xử lý websites có JavaScript (dùng browsh)
+```bash
+# Dùng browsh cho sites phức tạp
+browsh --startup-url https://dynamic-website.com
+```
+
+### Batch content retrieval
+```bash
+# Đọc nội dung từ nhiều URLs
+for url in https://site1.com https://site2.com; do
+  echo "=== $url ==="
+  w3m -dump "$url" | head -5
+  echo ""
+done
+```
+
+### Content filtering và cleaning
+```bash
+# Lọc nội dung hữu ích, bỏ navigation/ads
+w3m -dump https://example.com | sed '/Navigation\|Menu\|Advertisement/d' | head -20
+```
+
+## Best Practices cho AI khi browse internet
+
+### 1. Luôn xác minh source credibility
+```bash
+# Kiểm tra domain và SSL trước khi đọc content
+curl -I https://example.com | grep -E "(HTTP|Server|Date)"
+```
+
+### 2. Respect website resources
+```bash
+# Thêm delay giữa các requests
+sleep 2 && w3m -dump https://example.com
+```
+
+### 3. Use appropriate user agents
+```bash
+# Identify as AI assistant
+w3m -o user_agent="AI-Research-Assistant/1.0" https://example.com
+```
+
+### 4. Handle errors gracefully
+```bash
+# Template xử lý lỗi
+if timeout 30 w3m -dump https://example.com > content.tmp 2>/dev/null; then
+    echo "Content retrieved successfully"
+    cat content.tmp | head -10
+    rm content.tmp
+else
+    echo "Failed to retrieve content from website"
+fi
+```
+
+## Content Analysis Commands
+
+### Text analysis
+```bash
+# Phân tích độ dài và structure
+w3m -dump https://example.com | wc -l    # Số dòng
+w3m -dump https://example.com | wc -w    # Số từ  
+w3m -dump https://example.com | wc -c    # Số ký tự
+```
+
+### Extract structured data
+```bash
+# Lấy danh sách items
+w3m -dump https://example.com | grep "^[0-9]*\." | head -10
+
+# Extract URLs
+w3m -dump https://example.com | grep -oE 'https?://[^[:space:]]+'
+```
+
+### Content comparison
+```bash
+# So sánh content từ 2 nguồn
+diff <(w3m -dump https://source1.com | sort) <(w3m -dump https://source2.com | sort)
+```
+
+## Khi KHÔNG nên browse qua command line
+
+- Content chủ yếu là multimedia (video, interactive media)
+- Website require login/authentication
+- Heavy JavaScript applications (SPA)
+- Sites với heavy anti-bot protection
+
+Trong những trường hợp này, AI nên thông báo limitation và suggest alternative approaches.
+
+---
+
+# Linux Command Line Web Browsers & Website Checking Tools
+
+## Mục đích
+Cung cấp thông tin về các công cụ command line để duyệt web và kiểm tra trạng thái website trên Linux, thay thế cho việc sử dụng GUI browser.
+
+## Text Browsers (Lynx Alternatives)
+
+### 1. w3m - Khuyến nghị chính
+```bash
+# Cài đặt
+sudo apt install w3m w3m-img
+
+# Sử dụng
+w3m https://example.com
+w3m -dump https://example.com  # Text output only
+```
+
+**Ưu điểm:**
+- Render tables và frames tốt
+- Hỗ trợ hiển thị images (với w3m-img)
+- Navigation với mouse support
+- Nhẹ và ổn định
+
+### 2. Links2 - Advanced Features
+```bash
+# Cài đặt
+sudo apt install links2
+
+# Sử dụng
+links2 https://example.com
+links2 -g https://example.com  # Graphics mode
+```
+
+**Ưu điểm:**
+- Hỗ trợ JavaScript cơ bản
+- Graphics mode available
+- Menu-driven interface
+
+### 3. Elinks - Enhanced Links
+```bash
+# Cài đặt
+sudo apt install elinks
+
+# Sử dụng
+elinks https://example.com
+```
+
+**Ưu điểm:**
+- Tab browsing
+- Bookmark management
+- Scripting support (Lua/Guile)
+- Advanced configuration options
+
+### 4. Browsh - Modern Text Browser
+```bash
+# Cài đặt
+sudo snap install browsh
+# hoặc
+wget https://github.com/browsh-org/browsh/releases/download/v1.6.4/browsh_1.6.4_linux_amd64.deb
+sudo dpkg -i browsh_1.6.4_linux_amd64.deb
+
+# Sử dụng
+browsh https://example.com
+```
+
+**Ưu điểm:**
+- Sử dụng Firefox headless backend
+- Hiển thị gần giống browser thật
+- Full JavaScript và CSS support
+- Modern web standards
+
+### 5. Lynx - Classic Choice
+```bash
+# Cài đặt
+sudo apt install lynx
+
+# Sử dụng
+lynx https://example.com
+lynx -dump https://example.com  # Text only
+```
+
+## Website Status Checking Tools
+
+### 1. CURL - Primary Tool
+```bash
+# Basic status check
+curl -I https://example.com
+curl -Is https://example.com | head -1
+
+# Response time analysis
+curl -o /dev/null -s -w "Total: %{time_total}s | DNS: %{time_namelookup}s | Connect: %{time_connect}s\n" https://example.com
+
+# Content preview
+curl -s https://example.com | head -10
+
+# Follow redirects
+curl -L -I https://example.com
+
+# With timeout
+curl -I --connect-timeout 10 --max-time 30 https://example.com
+
+# SSL certificate info
+curl -vI https://example.com 2>&1 | grep -E "(expire|issuer)"
+```
+
+### 2. Wget - Alternative Checker
+```bash
+# Spider mode (check only, no download)
+wget --spider https://example.com
+
+# Quick content check
+wget -O - https://example.com | head -10
+
+# With timeout
+wget --timeout=10 --tries=1 --spider https://example.com
+```
+
+### 3. HTTPie (if available)
+```bash
+# Cài đặt
+sudo apt install httpie
+
+# Sử dụng
+http HEAD https://example.com
+http GET https://example.com
+```
+
+## Comparison Matrix
+
+| Tool | Best Use Case | Size | Key Features |
+|------|---------------|------|--------------|
+| **w3m** | General browsing | Medium | Tables, images, mouse |
+| **links2** | Advanced browsing | Medium | Graphics mode, JS |
+| **elinks** | Power users | Large | Tabs, scripting |
+| **browsh** | Modern sites | Large | Real browser engine |
+| **lynx** | Basic/legacy | Small | Simple, reliable |
+
+## Quick Command Reference
+
+### Status Check One-liner
+```bash
+# Quick website health check
+curl -Is https://example.com --connect-timeout 5 | head -1 && echo "Response time: $(curl -o /dev/null -s -w '%{time_total}s' https://example.com)"
+```
+
+### Content Analysis Commands
+```bash
+# Check for error keywords
+curl -s https://example.com | grep -i "error\|404\|not found"
+
+# Word count
+curl -s https://example.com | wc -w
+
+# Check specific content
+curl -s https://example.com | grep -i "keyword"
+```
+
+## Installation Priority
+
+**Recommended installation order:**
+1. `w3m` - Best general purpose text browser
+2. `curl` - Usually pre-installed, essential for status checks
+3. `links2` - For advanced browsing needs
+4. `elinks` - For power users who need tabs/scripting
+5. `browsh` - For modern JavaScript-heavy sites
+
+## Common HTTP Status Codes
+
+- **200 OK** - Success
+- **301 Moved Permanently** - Permanent redirect
+- **302 Found** - Temporary redirect
+- **403 Forbidden** - Access denied
+- **404 Not Found** - Page not found
+- **500 Internal Server Error** - Server error
+- **503 Service Unavailable** - Server temporarily unavailable
+
+## Best Practices
+
+1. **Always use HTTPS** when available
+2. **Set timeouts** to avoid hanging connections
+3. **Follow redirects** with `-L` flag in curl
+4. **Check SSL certificates** for HTTPS sites
+5. **Use appropriate user agents** if needed
+6. **Combine tools** for comprehensive checking
+
+## Troubleshooting
+
+### Common Issues:
+- **Connection timeout**: Use `--connect-timeout` option
+- **SSL certificate errors**: Use `-k` flag to ignore (for testing only)
+- **User agent blocking**: Use `-A` flag to set custom user agent
+- **Redirects not followed**: Use `-L` flag with curl
+
+### Debug Commands:
+```bash
+# Verbose curl output
+curl -v https://example.com
+
+# Show only headers
+curl -I https://example.com
+
+# Trace network activity
+curl --trace-ascii trace.log https://example.com
+```
+
+## Security Considerations
+
+- Never ignore SSL certificate errors in production
+- Be cautious with `-k` flag usage
+- Use appropriate timeouts to prevent DoS
+- Consider rate limiting when checking multiple sites
+- Validate URLs before processing user input
+
+## Related Files
+- `.cursor/rules/rule-system-prompt.mdc` - System requirements
+- `.memory/` - Technical notes and experiences
+
+## Single Command Installation (Ubuntu/Debian)
+
+### Install Everything at Once
+```bash
+sudo apt update && sudo apt install -y w3m w3m-img links2 elinks lynx httpie curl wget
+```
+
+### Command Breakdown:
+- `sudo apt update` - Update package repository list
+- `sudo apt install -y` - Install packages with auto-accept prompts
+- **w3m w3m-img** - Primary text browser + image support
+- **links2** - Advanced text browser with graphics mode
+- **elinks** - Enhanced links browser with tabs/scripting
+- **lynx** - Classic, reliable text browser
+- **httpie** - Modern HTTP client tool
+- **curl wget** - Essential web tools (ensure latest versions)
+
+### Optional: Modern Browser (Browsh)
+```bash
+sudo snap install browsh
+```
+
+### Verify Installation
+```bash
+# Test text browsers
+w3m --version && links2 --version && lynx --version
+
+# Test web tools
+curl --version && http --version
+
+# Quick functionality test
+curl -Is https://google.com | head -1
+```
+
+### Quick Start Commands
+```bash
+# Browse a website
+w3m https://example.com
+
+# Check website status
+curl -Is https://example.com | head -1
+
+# Get website content
+curl -s https://example.com | head -10
+```
